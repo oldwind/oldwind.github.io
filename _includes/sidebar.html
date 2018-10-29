@@ -1,0 +1,158 @@
+
+<style type="text/css">
+#v6_pl_rightmod_myinfo div {
+    display: block;
+    height: 78px;
+}
+
+.W_person_info .cover {
+    position: relative;
+    width: 225px;
+    height: 75px;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+.W_person_info .cover {
+    position: relative;
+    width: 225px;
+    height: 75px;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+.W_person_info .cover .headpic {
+    width: 60px;
+    height: 60px;
+    padding: 3px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    margin-left: -30px;
+}
+
+.W_face_radius {
+    border-radius: 50%;
+}
+
+.nameBox  {
+    vertical-align: middle;
+    max-width: 226px;
+    display: inline-block;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: bold;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    height: 16px;
+    line-height: 10px;
+    padding-top: 15px;
+    text-align: center;
+}
+
+.user_atten  {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
+}
+
+.user_atten li
+{
+    display: list-item;
+    float: left;
+    width: 65px;
+    text-align: center;
+    border-right-width: 1px;
+    border-right-style: solid;
+}
+
+</style>
+
+{% assign sidebar = site.data.sidebars[page.sidebar].entries %}
+
+
+<div id="v6_pl_rightmod_myinfo">
+    <div class="WB_cardwrap S_bg2">
+        <div class="W_person_info">
+            <div class="cover" id="skin_cover_s" style="background-image:url(https://img.t.sinajs.cn/t5/skin/public/profile_cover/001_s.jpg)">
+                <div class="headpic"> 
+                    <a bpfilter="page_frame" href="/index.html" title="叶斌46692">
+                        <img class="W_face_radius" src="images/mypic.jpeg" width="60" height="60" alt="壹木人">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="WB_innerwrap">
+            <div class="nameBox">
+                <a bpfilter="page_frame" href="/index.html" class="name S_txt1" title="叶斌46692">壹木人</a>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<ul id="mysidebar" class="nav">
+  <li class="sidebarTitle">{{sidebar[0].product}} {{sidebar[0].version}}</li>
+  {% for entry in sidebar %}
+  {% for folder in entry.folders %}
+  {% if folder.output contains "web" %}
+  <li>
+      <a href="#">{{ folder.title }}</a>
+      <ul>
+          {% for folderitem in folder.folderitems %}
+          {% if folderitem.output contains "web" %}
+          {% if folderitem.external_url %}
+          <li><a href="{{folderitem.external_url}}" target="_blank">{{folderitem.title}}</a></li>
+          {% elsif page.url == folderitem.url %}
+          <li class="active"><a href="{{folderitem.url | remove: "/"}}">{{folderitem.title}}</a></li>
+          {% elsif folderitem.type == "empty" %}
+          <li><a href="{{folderitem.url | remove: "/"}}">{{folderitem.title}}</a></li>
+
+          {% else %}
+          <li><a href="{{folderitem.url | remove: "/"}}">{{folderitem.title}}</a></li>
+          {% endif %}
+          {% for subfolders in folderitem.subfolders %}
+          {% if subfolders.output contains "web" %}
+          <li class="subfolders">
+              <a href="#">{{ subfolders.title }}</a>
+              <ul>
+                  {% for subfolderitem in subfolders.subfolderitems %}
+                  {% if subfolderitem.output contains "web" %}
+                  {% if subfolderitem.external_url %}
+                  <li><a href="{{subfolderitem.external_url}}" target="_blank">{{subfolderitem.title}}</a></li>
+                  {% elsif page.url == subfolderitem.url %}
+                  <li class="active"><a href="{{subfolderitem.url | remove: "/"}}">{{subfolderitem.title}}</a></li>
+                  {% else %}
+                  <li><a href="{{subfolderitem.url | remove: "/"}}">{{subfolderitem.title}}</a></li>
+                  {% endif %}
+                  {% endif %}
+                  {% endfor %}
+              </ul>
+          </li>
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+          {% endfor %}
+      </ul>
+   </li>
+     {% endif %}
+      {% endfor %}
+      {% endfor %}
+      <!-- if you aren't using the accordion, uncomment this block:
+         <p class="external">
+             <a href="#" id="collapseAll">Collapse All</a> | <a href="#" id="expandAll">Expand All</a>
+         </p>
+         -->
+</ul>
+
+<!-- this highlights the active parent class in the navgoco sidebar. this is critical so that the parent expands when you're viewing a page. This must appear below the sidebar code above. Otherwise, if placed inside customscripts.js, the script runs before the sidebar code runs and the class never gets inserted.-->
+<script>$("li.active").parents('li').toggleClass("active");</script>
