@@ -1,7 +1,8 @@
 ---
-layout: default
+layout: content
 title: helloworld
+category: php
 ---
 
 
-# hello world
+# 

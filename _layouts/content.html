@@ -73,22 +73,26 @@
 
 </head>
 <body>
-{% include topnav.html %}
 <!-- Page Content -->
-<div class="container">
+<div class="container" style="width: 99%;">
   <div id="main">
+    <div class="row">
+        <div style="text-align: center; font: 1.75em sans-serif; margin-bottom: 5px">
+            {{ page.title }}                
+        </div>
+    </div>
+    <div class="row">
+        <div style="text-align: right; font: 0.75em sans-serif; margin-bottom: 30px; width:60%">
+            Published on {{ page.date | date: "%b %-d, %Y" }}                
+        </div>
+    </div>
+
+
+
     <!-- Content Row -->
     <div class="row">
-        {% assign content_col_size = "col-md-12" %}
-        {% unless page.hide_sidebar %}
-            <!-- Sidebar Column -->
-            <div class="col-md-3" id="tg-sb-sidebar">
-                {% include sidebar.html %}
-            </div>
-            {% assign content_col_size = "col-md-9" %}
-        {% endunless %}
+        {% assign content_col_size = "col-md-9" %}
 
-        <!-- Content Column -->
         <div class="{{content_col_size}}" id="tg-sb-content">
             {{content}}
         </div>
@@ -100,14 +104,6 @@
 </div>
 
 
-<iframe name="frame1"   src="/sitebar.html"> </iframe> 
-<iframe name="frame2"   src="http://www.sohu.com"> </iframe> 
-
-
-
-
+{% include footer.html %}
 </body>
-{% if site.google_analytics %}
-{% include google_analytics.html %}
-{% endif %}
 </html>

@@ -1,4 +1,5 @@
 ---
+layout: content
 title:  "Sample post"
 published: true
 permalink: samplepost.html
