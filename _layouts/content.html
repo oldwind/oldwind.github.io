@@ -83,24 +83,21 @@
     </div>
     <div class="row">
         <div style="text-align: right; font: 0.75em sans-serif; margin-bottom: 30px; width:60%">
-            Published on {{ page.date | date: "%b %-d, %Y" }}                
+            Published {{ page.date | date: "%b %-d, %Y" }}                
         </div>
     </div>
 
 
+    <div class="post-content" itemprop="articleBody">
 
-    <!-- Content Row -->
-    <div class="row">
-        {% assign content_col_size = "col-md-9" %}
+            {% if page.summary %}
+            <div class="summary" style="font-size: 14px;">{{page.summary}}</div>
+            {% endif %}
+            
+            <div style="font-family: Helvetica, arial, sans-serif; font-size: 15px; line-height: 1.6;"> {{ content }}  </div>
+    </div>
 
-        <div class="{{content_col_size}}" id="tg-sb-content">
-            {{content}}
-        </div>
-    <!-- /.row -->
     </div>
-<!-- /.container -->
-    </div>
-<!-- /#main -->
 </div>
 
 
