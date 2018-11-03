@@ -94,9 +94,12 @@
             <div class="summary" style="font-size: 14px;">{{page.summary}}</div>
             {% endif %}
             
-            <div style="font-family: Helvetica, arial, sans-serif; font-size: 15px; line-height: 1.6;"> {{ content }}  </div>
-    </div>
+            {% unless page.toc == false %}
+            {% include toc.html %}
+            {% endunless %}
 
+            <div style="font-family: Helvetica, arial, sans-serif; font-size: 15px; line-height: 1.6;"> {{ content }}  </div>
+        </div>
     </div>
 </div>
 

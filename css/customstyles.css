@@ -92,7 +92,7 @@ margin-top: -40px
 }
 
 .post-content ol li, .post-content ul li {
-    margin: 10px 0px;
+    margin: 0px 0px;
 }
 
 .pageSummary {
@@ -240,16 +240,27 @@ ul#results-container a:hover {
     margin: 3px;
 }
 
+div#toc-warp {
+    padding: 10px 0px 5px 0px;  
+    background-color: whitesmoke;
+    margin-bottom: 20px;
+    max-width: 500px;
+ }
+
+div#toc {
+   padding: 0px 10px;  
+}
+
 div#toc ul li {
-    margin: 8px 0px 8px 22px;
-    font-size: 90%;
+    margin: 0px 0px 0px 22px;
+    font-size: 13px;
     list-style: square;
 }
 div#toc ul {
     background-color: whitesmoke;
-    padding: 5px;
+    padding: 0px 5px;
     border-radius: 5px;
-    max-width: 300px;
+    max-width: 500px;
     color: gray;
 }
 
@@ -262,8 +273,12 @@ div#toc ul li ul li::before {
     content: "–  ";
 }
 
+div#toc ol ul {
+    margin: 10px;
+}
+
 div#toc >ul::before {
-    content: "Table of Contents";
+    /* content: "目录"; */
     font-weight: 500;
     color: #555;
     text-align:center;

@@ -84,31 +84,36 @@
     </script>
     {% endif %}
 
+    <script type="text/javascript" language="javascript">
+        $(window.parent.document).find("#frame_right").load(function(){
+            var main = $(window.parent.document).find("#frame_right");
+            var thisheight = $(document).height()+30;
+            main.height(thisheight);
+        });
+    </script>
+
+    <style type="text/css">
+        #frame_left {
+            width: 20%;
+            height: 100%;
+            margin-left: 3%;
+            
+        }
+
+        #frame_right {
+            width: 76%;
+            height: 100%;
+        }
+
+    </style>
+
+    
 </head>
 <body>
 {% include topnav.html %}
 
-<style type="text/css">
-    #frame_left {
-        width: 20%;
-        height: 100%;
-        margin-left: 3%;
-        
-    }
-
-     #frame_right {
-        width: 76%;
-        height: 100%;
-        overflow-x:hidden
-        /* height: max-content; */
-       
-    }
-</style>
-
-
-
 <iframe id="frame_left" name="frame_left" scrolling=no frameborder=0  src="/sidebar.html"> </iframe> 
-<iframe id="frame_right" name="frame_right" frameborder=0  src="/content_list.html" allowtransparency="yes"></iframe> 
+<iframe id="frame_right" name="frame_right"   frameborder=0  src="/content_list.html" allowtransparency="yes"></iframe> 
 
 
 

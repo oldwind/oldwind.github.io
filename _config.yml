@@ -52,12 +52,27 @@ feedback_email: 534357478@qq.com
 highlighter: C
 # library used for syntax highlighting
 
-markdown: kramdown
+# markdown: kramdown
+# kramdown:
+#  input: GFM
+#  auto_ids: true
+#  hard_wrap: false
+#  syntax_highlighter: rouge
+
+markdown:       kramdown
+highlighter:    rouge
 kramdown:
- input: GFM
- auto_ids: true
- hard_wrap: false
- syntax_highlighter: rouge
+  input:                     GFM
+  auto_ids:                  true
+  footnote_nr:               1
+  entity_output:             as_char
+  toc_levels:                1..6
+  smart_quotes:              lsquo,rsquo,ldquo,rdquo
+  enable_coderay:            false
+  hard_wrap:                 false
+  syntax_highlighter:        rouge
+  transliterated_header_ids: true
+  footnote_backlink:         "&#8617;&#xfe0e;"
 
 # filter used to process markdown. note that kramdown differs from github-flavored markdown in some subtle ways
 
