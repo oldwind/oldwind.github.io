@@ -1,6 +1,7 @@
 ---
 layout: content
 title: 赠与今年的大学毕业生
+toc: false
 summary: "胡适 (原载1932年7月3日《独立评论》第7号，收入《胡适文存》第四集第四卷)"
 ---
 
