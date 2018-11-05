@@ -15,7 +15,6 @@
 
 .W_person_info .cover {
     position: relative;
-    max-width: 100%;
     height: 75px;
     background-repeat: no-repeat;
     z-index: 1;
@@ -122,7 +121,7 @@
                 <ul>
                     {% for page in site.posts  %}
                     {% if page.categories contains "php" %}
-                    <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                    <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                     {% endif %}
                     {% endfor %}
                 </ul>
@@ -131,7 +130,7 @@
             <li class="subfolders"><a href="#">Go</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "go" %}
-                            <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -142,7 +141,7 @@
                     <ul>
                         {% for page in site.posts  %}
                         {% if page.categories contains "Lua" %}
-                        <li><a href="{{ page.url }}" target="frame_right"  >{{ page.title }}</a></li>
+                        <li><a class="post_url" href="{{ page.url }}" target="frame_right"  >{{ page.title }}</a></li>
                         {% endif %}
                         {% endfor %}
                     </ul>
@@ -152,7 +151,7 @@
                     <ul>
                         {% for page in site.posts  %}
                         {% if page.categories contains "cpp" %}
-                        <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                        <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                         {% endif %}
                         {% endfor %}
                     </ul>
@@ -163,7 +162,7 @@
                 <ul>
                     {% for page in site.posts  %}
                     {% if page.categories contains "mysql" %}
-                    <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                    <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                     {% endif %}
                     {% endfor %}
                 </ul>
@@ -176,7 +175,7 @@
                 <ul>
                     {% for page in site.posts  %}
                     {% if page.categories contains "redis" %}
-                    <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                    <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                     {% endif %}
                     {% endfor %}
                 </ul>
@@ -187,7 +186,7 @@
                     <ul>
                         {% for page in site.posts  %}
                         {% if page.categories contains "memcache" %}
-                        <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                        <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                         {% endif %}
                         {% endfor %}
                     </ul>
@@ -196,7 +195,7 @@
             <li class="subfolders"><a href="#">Nginx</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "nginx" %}
-                            <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -205,7 +204,7 @@
             <li class="subfolders"><a href="#">Linux</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "linux" %}
-                            <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -214,7 +213,7 @@
             <li class="subfolders"><a href="#">Architecture</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "arch" %}
-                            <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -223,7 +222,7 @@
             <li class="subfolders"><a href="#">Blockchain</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "blockchain" %}
-                            <li><a href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -235,14 +234,14 @@
   <li>
         <a href="#">佳文共赏</a>
         <ul data-index="0" style="display: none;">
-            <li><a href="/pages/classical/classical_hushi.html"  target="frame_right"> 胡适:赠与今年的大学毕业生 </a></li>
+            <li><a class="post_url" href="/pages/classical/classical_hushi.html"  target="frame_right"> 胡适:赠与今年的大学毕业生 </a></li>
         </ul>
   </li>
   
   <li>
         <a href="#">关于我</a>
         <ul data-index="0" style="display: none;">
-            <li><a href="/mydoc_aboutme.html" target="frame_right" >我</a></li>  
+            <li><a class="post_url" href="/mydoc_aboutme.html" target="frame_right" >我</a></li>  
         </ul>
   </li>
   
