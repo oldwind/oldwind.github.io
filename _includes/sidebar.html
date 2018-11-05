@@ -109,7 +109,7 @@
         <a href="#">博文列表</a>
         <ul data-index="0" style="display: none;">
             {% for post in site.posts  %}
-            <li><a href="{{ post.url }}"  target="frame_right" >{{ post.title }} </a></li>
+            <li><a class="post_url" href="{{ post.url }}"  target="frame_right" >{{ post.title }} </a></li>
             {% endfor %}      
         </ul>
   </li>

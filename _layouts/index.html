@@ -51,22 +51,6 @@
         });
     </script>
 
-    <!-- <script type="text/javascript"> 
-        function SetCwinHeight(iframeObj){ 
-            if (document.getElementById){ 
-                if (iframeObj && !window.opera){ 
-                if (iframeObj.contentDocument && iframeObj.contentDocument.body.offsetHeight){ 
-                    iframeObj.height = iframeObj.contentDocument.body.offsetHeight; 
-                }else if(document.frames[iframeObj.name].document && document.frames[iframeObj.name].document.body.scrollHeight){ 
-                    iframeObj.height = document.frames[iframeObj.name].document.body.scrollHeight; 
-                } 
-            } 
-        }  
-    } 
-    </script>  -->
-
-
-
     {% if page.datatable == true %}
     <!-- Include the standard DataTables bits -->
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.css">
@@ -85,19 +69,40 @@
     {% endif %}
 
     <script type="text/javascript" language="javascript">
-        $(window.parent.document).find("#frame_right").load(function(){
-            var main = $(window.parent.document).find("#frame_right");
-            var thisheight = $(document).height()+30;
-            main.height(thisheight);
+        function GetUrl() {
+            var param = window.location.hash;
+
+            return param.substr(1) + param;
+        }
+
+        $(document).ready(function() {
+            var param = window.location.hash;
+            
+            if (param != "" && param != "#" && param != "#index.html") {
+                var src   = param.substr(1);
+                $('#frame_right').attr("src", src);
+
+            }    
+            $('.post_url').click(function(e){
+                var stateObject = {};
+                var title  = "";
+                url = "index.html#" + $(this).attr("href");
+                history.pushState(stateObject,title,url);
+            });
+
         });
+
+
+
+
+
     </script>
 
     <style type="text/css">
         #frame_left {
             width: 20%;
             height: 100%;
-            margin-left: 3%;
-            
+            margin-left: 3%;   
         }
 
         #frame_right {
@@ -111,7 +116,11 @@
 </head>
 <body>
 {% include topnav.html %}
-<iframe id="frame_left" name="frame_left" scrolling=no frameborder=0  src="/sidebar.html"> </iframe> 
+
+<div class="col-md-3" id="tg-sb-sidebar" style="width: 20%;  margin-left: 3%;">
+        {% include sidebar.html %}
+    </div>
+<!-- <iframe id="frame_left" name="frame_left" scrolling=no frameborder=0  src="/sidebar.html"> </iframe>  -->
 <iframe id="frame_right" name="frame_right"   frameborder=0  src="/content_list.html" allowtransparency="yes"></iframe> 
 
 
