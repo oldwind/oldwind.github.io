@@ -93,6 +93,8 @@
 
             if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
                 $("#tg-sb-sidebar").toggle();
+                $("#tg-sb-sidebar").width("100%");
+                $("#frame_right").width("100%");
                 $("#tg-sb-icon").toggleClass('fa-toggle-off');        
             } 
 
@@ -105,14 +107,9 @@
     </script>
 
     <style type="text/css">
-        #frame_left {
-            width: 20%;
-            height: 100%;
-            margin-left: 3%;   
-        }
 
         #frame_right {
-            width: 76%;
+            width: 77%;
             height: 100%;
         }
 
@@ -123,7 +120,7 @@
 <body>
 {% include topnav.html %}
 
-<div class="col-md-3" id="tg-sb-sidebar" style="width: 20%;  margin-left: 3%;">
+<div class="col-md-3" id="tg-sb-sidebar" style="width: 20%;  margin-left: 2%;">
         {% include sidebar.html %}
     </div>
 <!-- <iframe id="frame_left" name="frame_left" scrolling=no frameborder=0  src="/sidebar.html"> </iframe>  -->
