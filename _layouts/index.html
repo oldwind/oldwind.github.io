@@ -83,12 +83,17 @@
                 $('#frame_right').attr("src", src);
 
             }    
+
             $('.post_url').click(function(e){
                 var stateObject = {};
                 var title  = "";
                 url = "index.html#" + $(this).attr("href");
                 history.pushState(stateObject,title,url);
             });
+
+            if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+                $("#tg-sb-icon").toggleClass('fa-toggle-off');        
+            } 
 
         });
 
