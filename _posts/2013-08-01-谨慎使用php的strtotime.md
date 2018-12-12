@@ -1,7 +1,7 @@
 ---
 layout: content
 title: 谨慎使用php的strtotime
-mydef: ssss
+status: 1 
 category: php
 ---
 

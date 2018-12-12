@@ -1,6 +1,7 @@
 ---
 layout: content
 title: php内核opcode编译生成
+status: 2 
 category: c and c++
 ---
 

@@ -124,7 +124,13 @@
         {% assign offset = forloop.index0 | times: 2 %}
         <div class="posts">
             {% for post in site.posts limit:2 offset:offset %}
-            <span class="my_row"><a href="{{ post.url }}"> - {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></span>
+                {% if post.status == 1 %}
+                <span class="my_row"><a href="{{ post.url }}"> - {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></span>
+            
+                {% elsif post.status == 2 %}
+                <span class="my_row"><a href=""> - <span style="color:#FF0000; font-family: Helvetica, arial, sans-serif;">[计划中]</span> {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></span>
+                {% endif %}
+
             {% endfor %}
         </div>
     {% endfor %}
