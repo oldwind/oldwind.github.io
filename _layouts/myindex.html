@@ -122,6 +122,7 @@
     <div id="myposts">
     {% for i in (1..rows) %}
         {% assign offset = forloop.index0 | times: 2 %}
+        
         <div class="posts">
             {% for post in site.posts limit:2 offset:offset %}
                 {% if post.status == 1 %}
@@ -133,6 +134,12 @@
 
             {% endfor %}
         </div>
+
+        {% assign b = offset + 2 %}
+        {% assign res = b | modulo:10 %}
+        {% if res == 8  %}
+            <div style="height:20px"></div>
+        {% endif %}
     {% endfor %}
     </div>
 
