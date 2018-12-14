@@ -76,12 +76,15 @@
 #myposts {
     font-family: Helvetica, arial, sans-serif; 
     font-size: 14px; 
-    line-height: 1.8;
+    /* line-height: 1.8; */
 }
 
 .my_row {
-    width: 450px;
+    width: 49%;
     display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 
@@ -126,13 +129,13 @@
         <div class="posts">
             {% for post in site.posts limit:2 offset:offset %}
                 {% if post.status == 1 %}
-                <span class="my_row"><a href="{{ post.url }}"> - {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></span>
+                <div class="my_row"><a href="{{ post.url }}"> - {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></div>
             
                 {% elsif post.status == 2 %}
-                <span class="my_row"><a href=""> - <span style="color:#C0C0C0; font-family: Helvetica, arial, sans-serif;">[计划中]</span> {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></span>
+                <div class="my_row"><a href=""> - <span style="color:#C0C0C0; font-family: Helvetica, arial, sans-serif;">[计划中]</span> {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></div>
                 
                 {% elsif post.status == 3 %}
-                <span class="my_row"><a href="{{ post.url }}"> - <span style="color:#FF0000; font-family: Helvetica, arial, sans-serif;">[{{ post.complete }}]</span> {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></span>
+                <div class="my_row"><a href="{{ post.url }}"> - <span style="color:#FF0000; font-family: Helvetica, arial, sans-serif;">[{{ post.complete }}]</span> {{ post.title }}</a> &raquo; <i><span>{{ post.date | date_to_string }}</span></i></div>
                 
                 {% endif %}
 
