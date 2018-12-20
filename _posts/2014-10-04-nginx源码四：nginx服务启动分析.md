@@ -144,6 +144,51 @@ ngx_master_process_cycle
 
 ### 3.3 主流程核心数据结构分析
 
+main函数里面，非常核心的一块地方是初始化 `cycle`，我们先看一下`cycle`的结构类型而后看看`cycle`中会存什么数据
+{% highlight bash%}
+cycle = ngx_init_cycle(&init_cycle);
+{% endhighlight %} 
+
+{% highlight bash%}
+struct ngx_cycle_s {
+    void                  ****conf_ctx;           ### 存各个模块的配置信息
+    ngx_pool_t               *pool;               ### 数据连接池
+  
+    ngx_log_t                *log;                 ### 日志
+    ngx_log_t                 new_log;    
+
+    ngx_uint_t                log_use_stderr;  /* unsigned  log_use_stderr:1; */
+
+    ngx_connection_t        **files;      
+    ngx_connection_t         *free_connections;
+    ngx_uint_t                free_connection_n;
+
+    ngx_queue_t               reusable_connections_queue;
+
+    ngx_array_t               listening;
+    ngx_array_t               paths;
+    ngx_list_t                open_files;
+    ngx_list_t                shared_memory;
+
+    ngx_uint_t                connection_n;
+    ngx_uint_t                files_n;
+
+    ngx_connection_t         *connections;
+    ngx_event_t              *read_events;
+    ngx_event_t              *write_events;
+
+    ngx_cycle_t              *old_cycle;
+
+    ngx_str_t                 conf_file;
+    ngx_str_t                 conf_param;
+    ngx_str_t                 conf_prefix;
+    ngx_str_t                 prefix;
+    ngx_str_t                 lock_file;
+    ngx_str_t                 hostname;
+};
+{% endhighlight %} 
+
+
 
 
 
