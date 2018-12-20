@@ -109,10 +109,42 @@ nginx通常会for 循环 `ngx_modules[]` 这个数组，而后给module加上编
 }
 {% endhighlight %} 
 
-
 ### 3.2 进入main函数
 
-了解插件的
+了解插件的加载后，我们从main方法(`src/core/nginx.c`)进去分析，提供一系列方法
+{% highlight bash%}ngx_debug_init
+ngx_strerror_init
+ngx_get_options
+ngx_time_init
+ngx_regex_init
+ngx_log_init
+ngx_ssl_init
+ngx_save_argv
+ngx_process_options
+ngx_os_init
+ngx_crc32_table_init
+ngx_add_inherited_sockets
+ngx_init_cycle
+ngx_init_signals
+ngx_daemon
+ngx_create_pidfile
+ngx_log_redirect_stderr
+
+ngx_single_process_cycle
+ngx_master_process_cycle
+{% endhighlight %} 
+
+总体我们分成几类来看
+- 一类是基础环境类的初始化，例如将`strerror`，`time`，`regex`，`SSL`，`log`, `os`等
+- 二类是处理终端的参数请求，例如 `nginx -V`
+- 三类是主流程的业务数据结构处理，例如 nginx的核心数据结构 `ngx_cycle_s` 在此时被初始化，以及挂载主流程关心的数据
+- 四类是进程的启动模式，`single模式`还是`master - slave模式`
+
+分析nginx的main函数，我们也可以看到，nginx支持
+
+### 3.3 主流程核心数据结构分析
+
+
 
 
 
