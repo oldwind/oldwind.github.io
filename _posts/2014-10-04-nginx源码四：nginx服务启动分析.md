@@ -2,7 +2,7 @@
 layout: content
 title: nginx源码四：nginx服务启动分析
 status:  3
-complete: 50% 
+complete: 70% 
 category: nginx
 ---
 
@@ -144,15 +144,21 @@ ngx_master_process_cycle
 
 ### 3.3 主流程核心数据结构分析
 
-main函数里面，非常核心的一块地方是初始化 `cycle`，我们先看一下`cycle`的结构类型而后看看`cycle`中会存什么数据
+main函数里面，非常核心的一块地方是初始化 `cycle`
 {% highlight bash%}
 cycle = ngx_init_cycle(&init_cycle);
 {% endhighlight %} 
 
+我们先看一下`cycle`的结构类型而后看看`cycle`中会存什么数据， 从下面的数据结构，我们其实可以看出，主要是配置、连接、监听端口等等信息；关于`cycle`数据结构的功能边界，分成两个方面
+一方面体现`共享特性`
+- 配置的共享，nginx采用插件化架构，每个插件，实际上关心两个方面的事情，一是配置信息，二是执行的handle；配置信息并不区分进程模型，不关心是 `single`模型还是 `master-salve`，也就是如果有子进程，还是共享同一份用户的配置，插件被主进程调起后，开始执行conf的分析，将分析的配置写内存池中，通过`cycle`的 `void ****conf_tx` 串联起来，后面这个会有单独一节，解释一下配置信息的存储
+
+- 监听端口，连接数信息，指定的conf配置路径等等，这些也是不区分进程的，父子进程共享的信息
+
 {% highlight bash%}
 struct ngx_cycle_s {
     void                  ****conf_ctx;           ### 存各个模块的配置信息
-    ngx_pool_t               *pool;               ### 数据连接池
+    ngx_pool_t               *pool;               ### 内存池
   
     ngx_log_t                *log;                 ### 日志
     ngx_log_t                 new_log;    
@@ -160,37 +166,33 @@ struct ngx_cycle_s {
     ngx_uint_t                log_use_stderr;  /* unsigned  log_use_stderr:1; */
 
     ngx_connection_t        **files;      
-    ngx_connection_t         *free_connections;
-    ngx_uint_t                free_connection_n;
+    ngx_connection_t         *free_connections;     ### 空闲连接指针
+    ngx_uint_t                free_connection_n;    ### 连接数
 
-    ngx_queue_t               reusable_connections_queue;
+    ngx_queue_t               reusable_connections_queue;   ### 可用连接队列信息
 
-    ngx_array_t               listening;
+    ngx_array_t               listening;         ### 监听的端口 数组 
     ngx_array_t               paths;
-    ngx_list_t                open_files;
-    ngx_list_t                shared_memory;
+    ngx_list_t                open_files;        ### 打开的文件链表
+    ngx_list_t                shared_memory;     ### 共享内存列表
 
-    ngx_uint_t                connection_n;
+    ngx_uint_t                connection_n;  
     ngx_uint_t                files_n;
 
     ngx_connection_t         *connections;
-    ngx_event_t              *read_events;
-    ngx_event_t              *write_events;
+    ngx_event_t              *read_events;       ### 读事件链表
+    ngx_event_t              *write_events;      ### 写事件链表
 
-    ngx_cycle_t              *old_cycle;
+    ngx_cycle_t              *old_cycle;         ### 历史cycle信息
 
-    ngx_str_t                 conf_file;
-    ngx_str_t                 conf_param;
-    ngx_str_t                 conf_prefix;
-    ngx_str_t                 prefix;
+    ngx_str_t                 conf_file;         ### 配置文件地址
+    ngx_str_t                 conf_param;        ### 配置文件参数
+    ngx_str_t                 conf_prefix;       ### 配置文件前缀
+    ngx_str_t                 prefix;                     
     ngx_str_t                 lock_file;
     ngx_str_t                 hostname;
 };
 {% endhighlight %} 
-
-
-
-
 
 
 ## 四. nginx的"插件化"
