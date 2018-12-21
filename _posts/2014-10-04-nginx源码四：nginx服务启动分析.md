@@ -135,7 +135,7 @@ ngx_master_process_cycle
 {% endhighlight %} 
 
 总体我们分成几类来看
-- 一类是基础环境类的初始化，例如将`strerror`，`time`，`regex`，`SSL`，`log`, `os`等
+- 一类是基础环境类的初始化，例如将`strerror`，`time`，`regex`，`ssl`，`log`, `os`等
 - 二类是处理终端的参数请求，例如 `nginx -V`
 - 三类是主流程的业务数据结构处理，例如 nginx的核心数据结构 `ngx_cycle_s` 在此时被初始化，以及挂载主流程关心的数据
 - 四类是进程的启动模式，`single模式`还是`master - slave模式`
@@ -196,4 +196,70 @@ struct ngx_cycle_s {
 
 
 ## 四. nginx的"插件化"
+还是先上代码，解释一下什么是nginx的"插件化"，插件化是这里的描述，nginx并不是用`plugin`来形容插件，用的是`module`，我觉得插件和模块或者说是组件拥有相同的意思，先看一下module的数据结构，在来分析一下，一个模块或者说一个插件需要的核心属性
+
+{% highlight bash%}
+struct ngx_module_s {
+    ngx_uint_t            ctx_index;
+    ngx_uint_t            index;
+
+    ngx_uint_t            spare0;
+    ngx_uint_t            spare1;
+    ngx_uint_t            spare2;
+    ngx_uint_t            spare3;
+
+    ngx_uint_t            version;
+
+    void                 *ctx;
+    ngx_command_t        *commands;
+    ngx_uint_t            type;
+
+    ngx_int_t           (*init_master)(ngx_log_t *log);
+
+    ngx_int_t           (*init_module)(ngx_cycle_t *cycle);
+
+    ngx_int_t           (*init_process)(ngx_cycle_t *cycle);
+    ngx_int_t           (*init_thread)(ngx_cycle_t *cycle);
+    void                (*exit_thread)(ngx_cycle_t *cycle);
+    void                (*exit_process)(ngx_cycle_t *cycle);
+
+    void                (*exit_master)(ngx_cycle_t *cycle);
+
+    uintptr_t             spare_hook0;
+    uintptr_t             spare_hook1;
+    uintptr_t             spare_hook2;
+    uintptr_t             spare_hook3;
+    uintptr_t             spare_hook4;
+    uintptr_t             spare_hook5;
+    uintptr_t             spare_hook6;
+    uintptr_t             spare_hook7;
+};
+{% endhighlight %} 
+
+从代码中，我们能看出:
+
+- 插件的类型，nginx有多种插件类型，实际上只是两个层次，第一层次是NGX_CORE_MODULE, 第二层次是下面列表所示其它的类型； 这两个层次的关系，我们在后面说
+    - NGX_CORE_MODULE
+    - NGX_CONF_MODULE
+    - NGX_EVENT_MODULE
+    - NGX_HTTP_MODULE
+    - NGX_MAIL_MODULE
+- 插件的编号，将插件做好编号后，方便获取插件的配置等信息
+    - 所有模块的编号 `ngx_uint_t   index;`
+    - 子类型模块的编号 `ngx_uint_t   ctx_index;`
+- 插件的command；command包含了对配置指令的set等信息
+- 插件的`void  *ctx;`，存储配置信息头，从配置信息头，可以获取所有模块的配置信息
+- 扩展的`hook`
+
+
+{% highlight bash%}
+struct ngx_command_s {
+    ngx_str_t             name;
+    ngx_uint_t            type;
+    char               *(*set)(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+    ngx_uint_t            conf;
+    ngx_uint_t            offset;
+    void                 *post;
+};
+{% endhighlight %} 
 
