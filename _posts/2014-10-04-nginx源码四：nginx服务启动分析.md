@@ -1,8 +1,8 @@
 ---
 layout: content
 title: nginx源码四：nginx服务启动分析
-status:  3
-complete: 70% 
+status:  1
+# complete: 70% 
 category: nginx
 ---
 
@@ -263,6 +263,17 @@ struct ngx_command_s {
 };
 {% endhighlight %} 
 
+nginx插件化执行的流程大致是这样的：
+1. 首先处理配置问题，这个会在下一节详细介绍nginx配置文件的分析， 配置分析处理，大体有三个步骤
+    - 先创建数据结构
+    - 将配置分析的数据写到创建的数据结构中
+    - 如果用户没有配置，写入初始化的数据
+
+2. 配置信息处理结束后，nginx按照顺序调用各个模块的的插件方法； 基本数序是
+    `init_master >  init_module > init_process > init_thread >  exit_thread >  exit_process > exit_master` 
+    实际上从代码上看， `init_master`, `init_thread`, `exit_thread` 这三个钩子在主流程上还没有支持
 
 
+## 五. 结束
+我们这篇主要介绍nginx的流程启动，了解nginx的架构思路，nginx的代码整体上比较难读，原因在架构上，了解完架构后，我们在后面对nginx的配置文件进行分析，配置文件分析后，就可以解决程序的第一个问题，那就是数据结构的问题了
 
