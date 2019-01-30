@@ -61,7 +61,7 @@ Thread 2 hit Breakpoint 2, zend_execute_scripts (type=8, retval=0x0, file_count=
 Parse error: syntax error, unexpected '=' in /test.php on line 2
 [Inferior 1 (process 74169) exited with code 0377]
 {% endhighlight %}
-
+  
 {% highlight bash %}
 #0  zendparse () at Zend/zend_language_parser.c:6869
 #1  0x00000001006080d2 in compile_file (file_handle=0x7ffeefbff140, type=8) at Zend/zend_language_scanner.l:585
