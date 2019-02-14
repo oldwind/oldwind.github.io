@@ -142,7 +142,7 @@
         <a href="#">博文列表</a>
         <ul data-index="0" style="display: none;">
             {% for post in site.posts  %}
-            <li><a class="post_url" href="{{ post.url }}"  target="frame_right" >{{ post.title }} </a></li>
+            <li><a class="post_url"  onclick='gotopage("{{ post.url }}")'> {{ post.title }} </a></li>
             {% endfor %}      
         </ul>
   </li>
@@ -155,7 +155,7 @@
                 <ul>
                     {% for page in site.posts  %}
                     {% if page.categories contains "php" %}
-                    <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                    <li><a class="post_url" onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                     {% endif %}
                     {% endfor %}
                 </ul>
@@ -164,7 +164,7 @@
             <li class="subfolders"><a href="#">Go</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "go" %}
-                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url"  onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -175,7 +175,7 @@
                     <ul>
                         {% for page in site.posts  %}
                         {% if page.categories contains "Lua" %}
-                        <li><a class="post_url" href="{{ page.url }}" target="frame_right"  >{{ page.title }}</a></li>
+                        <li><a class="post_url"  onclick='gotopage("{{ page.url }}")'  >{{ page.title }}</a></li>
                         {% endif %}
                         {% endfor %}
                     </ul>
@@ -185,7 +185,7 @@
                     <ul>
                         {% for page in site.posts  %}
                         {% if page.categories contains "cpp" %}
-                        <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                        <li><a class="post_url"  onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                         {% endif %}
                         {% endfor %}
                     </ul>
@@ -196,7 +196,7 @@
                 <ul>
                     {% for page in site.posts  %}
                     {% if page.categories contains "mysql" %}
-                    <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                    <li><a class="post_url"  onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                     {% endif %}
                     {% endfor %}
                 </ul>
@@ -209,7 +209,7 @@
                 <ul>
                     {% for page in site.posts  %}
                     {% if page.categories contains "redis" %}
-                    <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                    <li><a class="post_url"  onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                     {% endif %}
                     {% endfor %}
                 </ul>
@@ -220,7 +220,7 @@
                     <ul>
                         {% for page in site.posts  %}
                         {% if page.categories contains "memcache" %}
-                        <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                        <li><a class="post_url"  onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                         {% endif %}
                         {% endfor %}
                     </ul>
@@ -229,7 +229,7 @@
             <li class="subfolders"><a href="#">Nginx</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "nginx" %}
-                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url"  onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -238,16 +238,17 @@
             <li class="subfolders"><a href="#">Linux</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "linux" %}
-                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url"  onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
             </li>
 
-            <li class="subfolders"><a href="#">Architecture</a> <ul>
+            <li class="subfolders"><a href="#">Architecture</a> 
+                <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "arch" %}
-                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url" onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -256,7 +257,7 @@
             <li class="subfolders"><a href="#">Blockchain</a> <ul>
                     {% for page in site.posts  %}
                         {% if page.categories contains "blockchain" %}
-                            <li><a class="post_url" href="{{ page.url }}" target="frame_right" >{{ page.title }}</a></li>
+                            <li><a class="post_url"  onclick='gotopage("{{ page.url }}")' >{{ page.title }}</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -268,32 +269,18 @@
   <li>
         <a href="#">佳文共赏</a>
         <ul data-index="0" style="display: none;">
-            <li><a class="post_url" href="/pages/classical/classical_hushi.html"  target="frame_right"> 胡适:赠与今年的大学毕业生 </a></li>
+            <li><a class="post_url"  onclick='gotopage("/pages/classical/classical_hushi.html")'> 胡适:赠与今年的大学毕业生 </a></li>
         </ul>
   </li>
   
   <li>
         <a href="#">关于我</a>
         <ul data-index="0" style="display: none;">
-            <li><a class="post_url" href="/mydoc_aboutme.html" target="frame_right" >我</a></li>  
+            <li><a class="post_url" onclick='gotopage("/mydoc_aboutme.html")' >我</a></li>  
         </ul>
   </li>
   
   
 </ul>
 
-<!-- <hr/>
-
-<div class="s-title">站点信息</div>
-<div class="sidebar-left">   
-    <ul class="side-ul-class">
-      <li><b>建站时间</b>：2017-10-01</li>
-      <li><b>移动页面</b>：扫描二维码访问!</li>
-      <li><a href="/" target="_blank"><img class="sss_im" src="/images/mysite.png"></a></li>
-    </ul>
-</div> -->
-
-
-
-<!-- this highlights the active parent class in the navgoco sidebar. this is critical so that the parent expands when you're viewing a page. This must appear below the sidebar code above. Otherwise, if placed inside customscripts.js, the script runs before the sidebar code runs and the class never gets inserted.-->
 <script>$("li.active").parents('li').toggleClass("active");</script>
