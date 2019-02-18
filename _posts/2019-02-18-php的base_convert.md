@@ -19,9 +19,9 @@ category: php
 
 ## 二. 源码分析
 
+### 2.1 主函数
 从代码中，我们能看出几点，一是输入的number参数是一个zval格式，支持多种类型输入，输入的结果会被convert成string，同时，frombase和tobase支持的进制范围在2到36之间，也就是 `base_convert`支持2到36进制之间的数据的进制转换；类型处理完后的第二步，是将`number`转成10进制，转成的10进制数据，会根据是否大于long类型，放在zval类型的temp字段中；最后第三步，是将long类型或者double类型的number转换成tobase的进制。 下面是代码过程
 
-### 2.1 主函数
 {% highlight c %}
 PHP_FUNCTION(base_convert)
 {
