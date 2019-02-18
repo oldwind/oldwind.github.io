@@ -78,13 +78,12 @@
         }
 
         $(document).ready(function() {
-            // var param = window.location.hash;
+            var param = window.location.hash;
             
-            // if (param != "" && param != "#" && param != "#index.html") {
-            //     var src   = param.substr(1);
-            //     $('#frame_right').attr("src", src);
-
-            // }    
+            if (param != "" && param != "#" && param != "#index.html") {
+                var src   = param.substr(1);
+                gotopage(src);
+            }    
 
             if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
                 $("#tg-sb-sidebar").toggle();
@@ -109,8 +108,10 @@
                 })
 
             });
-            
 
+            var stateObject = {};
+            var newUrl = "index.html#" + url;
+            history.pushState(stateObject,"",newUrl);
             return false;
         }
 
