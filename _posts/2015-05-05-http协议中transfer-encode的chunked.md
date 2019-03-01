@@ -42,4 +42,4 @@ category: php
 
 ## 二. http1.1协议的Transfer-Encoding
 
-1. Transfer-Encoding 是http1.1新增的，所以要求接收http请求的服务器具备http1.1的解析能力
+1. Transfer-Encoding 是http1.1新增的，所以要求接收http请求的服务器具备http1.1的解析能力；如果http
