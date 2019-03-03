@@ -18,7 +18,6 @@ category: nginx
 
 {% highlight bash%}
     event{
-
     }
     http {
         server {
@@ -39,14 +38,11 @@ category: nginx
 
 ## 二.nginx的配置文件的分析流程
 
-我们从两点来说nginx的配置文件分析过程，
+我们从两点来说nginx的配置文件分析过程，第一点，流程；如同定义一个变量，从声明到使用，有一个流程，在程序里面，我们可以先声明，在赋值，然后使用； 也可以声明和赋值一起，然后使用；nginx在处理配置的分析时候，严格定义了流程
 
-- 第一点，流程；如同定义一个变量，从声明到使用，有一个流程，在程序里面，我们可以先声明，在赋值，然后使用； 也可以声明和赋值一起，然后使用；nginx在处理配置的分析时候，严格定义了流程
-    - 首先，执行conf的create，所谓的create；就是对所有模块设定的conf的数据结构的成员变量赋默认值，例如下面的`ngx_core_module_create_conf`;
-    - 
-
-
-
+### 2.1 conf的create
+所谓的create；就是对所有模块设定的conf的数据结构的成员变量赋默认值，例如下面的`ngx_core_module_create_conf`
+   
 {% highlight c%}
 static ngx_core_module_t  ngx_core_module_ctx = {
     ngx_string("core"),
@@ -58,22 +54,10 @@ static ngx_core_module_t  ngx_core_module_ctx = {
 ngx_module_t  ngx_core_module = {
     NGX_MODULE_V1,
     &ngx_core_module_ctx,                  /* module context */
-    ngx_core_commands,                     /* module directives */
-    NGX_CORE_MODULE,                       /* module type */
-    NULL,                                  /* init master */
-    NULL,                                  /* init module */
-    NULL,                                  /* init process */
-    NULL,                                  /* init thread */
-    NULL,                                  /* exit thread */
-    NULL,                                  /* exit process */
-    NULL,                                  /* exit master */
-    NGX_MODULE_V1_PADDING
+    ...
 };
 
-
-static void *
-ngx_core_module_create_conf(ngx_cycle_t *cycle)
-{
+static void *ngx_core_module_create_conf(ngx_cycle_t *cycle) {
     ngx_core_conf_t  *ccf;
 
     ccf = ngx_pcalloc(cycle->pool, sizeof(ngx_core_conf_t));
@@ -84,6 +68,37 @@ ngx_core_module_create_conf(ngx_cycle_t *cycle)
 
 }
 {% endhighlight %}
+
+### 2.2 配置文件解析
+
+将分析结果写到对应配置的conf数据结构里面
+
+{% highlight c%}
+
+if (ngx_conf_parse(&conf, &cycle->conf_file) != NGX_CONF_OK) {
+    environ = senv;
+    ngx_destroy_cycle_pools(&conf);
+    return NULL;
+}
+{% endhighlight %}
+
+### 2.3 配置信息的默认值
+如果有些配置信息没有配置，则赋予默认值
+
+{% highlight c%}
+
+static char *
+ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
+{
+    ngx_core_conf_t  *ccf = conf;
+
+    ngx_conf_init_value(ccf->daemon, 1);
+    ngx_conf_init_value(ccf->master, 1);
+    ...
+}
+{% endhighlight %}
+
+nginx里面除了`NGX_HTTP_MODULE`，其余的基本都是这个流程，设计上，对于http下的
 
 
 ## 三.nginx配置存储结构
