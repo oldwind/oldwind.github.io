@@ -98,8 +98,20 @@ ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
 }
 {% endhighlight %}
 
-nginx里面除了`NGX_HTTP_MODULE`，其余的基本都是这个流程，设计上，对于http下的
+nginx里面除了`NGX_HTTP_MODULE`，其余的基本都是这个流程，设计上，对于http下的module有些区别，http下的module需要考虑
 
 
 ## 三.nginx配置存储结构
+
+
+
+
+
+![ngx_http_conf](/images/nginx/ngx_conf.jpg)
+
+
+![ngx_http_conf](/images/nginx/ngx_conf2.jpg)
+
+
+![ngx_http_conf](/images/nginx/ngx_http_conf.jpg)
 
