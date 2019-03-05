@@ -54,6 +54,7 @@ static ngx_core_module_t  ngx_core_module_ctx = {
 ngx_module_t  ngx_core_module = {
     NGX_MODULE_V1,
     &ngx_core_module_ctx,                  /* module context */
+    ngx_http_core_commands,                /* module directives */
     ...
 };
 
@@ -98,11 +99,58 @@ ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
 }
 {% endhighlight %}
 
-nginx里面除了`NGX_HTTP_MODULE`，其余的基本都是这个流程，设计上，对于http下的module有些区别，http下的module需要考虑
-
-
 ## 三.nginx配置存储结构
 
+`创建配置项，分析配置文件，初始化未定义的默认值`，这三件事情是配置处理的主思路，但是针对配置分析的流程，说的还是不细，我们下面详细说配置分析的流程，并且说一下配置的最终存储结构， 我们拿到一个简单的配置文件，说一下nginx的处理思路
+
+{% highlight bash%}
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+    use epoll;
+}
+
+
+http {
+    default_type  application/octet-stream;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+    }
+}
+
+keepalive_timeout  65;
+{% endhighlight %}
+
+1. 首先Nginx给每个模块都做了编号，现在要存储每个模块的上下文信息，通过模块编号来存取
+
+
+
+
+
+前面已经分析到，nginx拥有插件化(module)的架构，每个插件需要关心的问题是在不同阶段的静态信息获取，例如用户在配置阶段对插件的指令做了配置，那么在执行阶段如何获取到这个指令的配置信息？ 
+
+另外，nginx的配置信息具备一定的"层次性"，分层的方法是通过 "{}"来实现，例如 "event {}"，在这里，`event`指令是通过`ngx_event_module`来管理，
+
+
+另外，指令的配置并不是一个一维数组，存在下面几种情况
+- NGX_CORE_MODULE 的指令配置； 
+    - 我们可以看下面一张图，对于一个核心模块，例如`ngx_core_module`，他的指令是唯一的，像`worker_processes`指令
+- NGX_EVENT_MODULE 的指令配置；
+    - 指令有了分层的概念，`event {}`， 这里面`event`指令是
+- NGX_HTTP_MODULE 的指令配置
+
+其它的几种module的管理方式，和这三种类别一致，这里不一一详细描述了
+
+
+配置信息的存储结构需要考虑一个问题，
 
 
 
