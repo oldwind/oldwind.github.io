@@ -2,7 +2,7 @@
 layout: content
 title: nginx源码五：nginx配置加载分析
 status: 3
-complete: 20% 
+complete: 80% 
 category: nginx
 ---
 
