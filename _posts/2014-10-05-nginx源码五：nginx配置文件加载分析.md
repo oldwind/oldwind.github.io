@@ -75,12 +75,24 @@ static void *ngx_core_module_create_conf(ngx_cycle_t *cycle) {
 将分析结果写到对应配置的conf数据结构里面
 
 {% highlight c%}
+    conf.module_type = NGX_CORE_MODULE;
+    conf.cmd_type = NGX_MAIN_CONF;
 
-if (ngx_conf_parse(&conf, &cycle->conf_file) != NGX_CONF_OK) {
-    environ = senv;
-    ngx_destroy_cycle_pools(&conf);
-    return NULL;
-}
+#if 0
+    log->log_level = NGX_LOG_DEBUG_ALL;
+#endif
+
+    if (ngx_conf_param(&conf) != NGX_CONF_OK) {
+        environ = senv;
+        ngx_destroy_cycle_pools(&conf);
+        return NULL;
+    }
+
+    if (ngx_conf_parse(&conf, &cycle->conf_file) != NGX_CONF_OK) {
+        environ = senv;
+        ngx_destroy_cycle_pools(&conf);
+        return NULL;
+    }
 {% endhighlight %}
 
 ### 2.3 配置信息的默认值
@@ -101,65 +113,80 @@ ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
 
 ## 三.nginx配置存储结构
 
-`创建配置项，分析配置文件，初始化未定义的默认值`，这三件事情是配置处理的主思路，但是针对配置分析的流程，说的还是不细，我们下面详细说配置分析的流程，并且说一下配置的最终存储结构， 我们拿到一个简单的配置文件，说一下nginx的处理思路
+`创建配置项；分析配置文件；初始化未定义的默认值`，这三件事情是配置处理的主思路，但是针对配置分析的流程，说的还是不细，我们下面详细说配置分析的流程，并且说一下配置的最终存储结构，我们拿到一个简单的配置文件，说一下nginx的处理思路
 
 {% highlight bash%}
 worker_processes  1;
-
 events {
     worker_connections  1024;
     use epoll;
 }
-
-
 http {
     default_type  application/octet-stream;
 
     server {
         listen       80;
         server_name  localhost;
-
         location / {
             root   html;
             index  index.html index.htm;
         }
     }
 }
-
 keepalive_timeout  65;
 {% endhighlight %}
 
-1. 首先Nginx给每个模块都做了编号，现在要存储每个模块的上下文信息，通过模块编号来存取
-
-
-
-
-
-前面已经分析到，nginx拥有插件化(module)的架构，每个插件需要关心的问题是在不同阶段的静态信息获取，例如用户在配置阶段对插件的指令做了配置，那么在执行阶段如何获取到这个指令的配置信息？ 
-
-另外，nginx的配置信息具备一定的"层次性"，分层的方法是通过 "{}"来实现，例如 "event {}"，在这里，`event`指令是通过`ngx_event_module`来管理，
-
-
-另外，指令的配置并不是一个一维数组，存在下面几种情况
-- NGX_CORE_MODULE 的指令配置； 
-    - 我们可以看下面一张图，对于一个核心模块，例如`ngx_core_module`，他的指令是唯一的，像`worker_processes`指令
-- NGX_EVENT_MODULE 的指令配置；
-    - 指令有了分层的概念，`event {}`， 这里面`event`指令是
-- NGX_HTTP_MODULE 的指令配置
-
-其它的几种module的管理方式，和这三种类别一致，这里不一一详细描述了
-
-
-配置信息的存储结构需要考虑一个问题，
-
-
-
-
+主要步骤：
+- `1. 首先Nginx给每个模块都做了编号，编号信息存在插件的index变量里面`
+- `2. 申请一段连续的内存，准备存放各个插件的上下文信息的访问指针`
+- `3. 调起所有的NGX_CORE_MODULE插件，初始化插件的配置`
+- `4. 开始分析配置文件指令，首先分析下面的指令类别`
+    - conf.module_type = NGX_CORE_MODULE;
+    - conf.cmd_type = NGX_MAIN_CONF;
+- `5. 分析到第一个指令"worker_processes"， 遍历查找所有 NGX_CORE_MODULE 插件，指令类型是 NGX_MAIN_CONF 的指令，执行指令对应的handle`
+- `6. 对于"worker_processes"， 因为前面已经创建配置信息，配置信息获取方式如下图，所以这里可以直接更新到ngx_core_conf_t类型的结构体里`
 ![ngx_http_conf](/images/nginx/ngx_conf.jpg)
 
+- `7. 配置文件继续分析，分析到event指令 和 "{"`
+- `8. 调起event指令的处理handle "ngx_events_block"`
 
+{% highlight c %}
+static ngx_command_t  ngx_events_commands[] = {
+
+    { ngx_string("events"),
+      NGX_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
+      ngx_events_block,
+      0,
+      0,
+      NULL },
+
+      ngx_null_command
+};
+{% endhighlight %}
+
+- `9. ngx_events_block 开启event模块的处理流程，首先创建连续的内存，存放所有NGX_EVENT_MODULE类型模块上下文指针，这段连续内存的访问方式见上图标识`
+- `10. 启动分析block内的指令`
+    - cf->module_type = NGX_EVENT_MODULE;
+    - cf->cmd_type = NGX_EVENT_CONF;
+- `11. 分析完配置后，写到第9步NGX_EVENT_MODULE类型模块上下文指针指向的上下文配置信息里面`
+
+<br/>
+**这里面能够看出一个思路：配置分类型，实际也是分了权限，管理方式是，NGX_CORE_MODULE类型模块管理NGX_EVENT_MODULE类型模块，而下面要分析的是http指令，http的配置情况有所不同，我们看一下下面的图，实际存在下面几个特点**
+<br/>
+
+- http，server，location之间关系是一个多叉树结构
 ![ngx_http_conf](/images/nginx/ngx_conf2.jpg)
 
-
+- 配置的选择顺序按照 location 到 server 到 http先后关系，例如 root这个指令，它可以在 http， server， location三个级别做配置；那么对于location匹配到的请求，选择配置信息的顺序是，如果 location {} 里面配置了，选用location下面，否则就是 server {}, 在次是http {}
+{% highlight c %}
+    { ngx_string("root"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
+                        |NGX_CONF_TAKE1,
+      ngx_http_core_root,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      0,
+      NULL },
+{% endhighlight %}
+- 理论上，nginx可以配置无限个server，每个server又可以配置无限多个location，这里面对于一个请求，如何快速找到对应server里面的location，我们可以看一下下面的图：
 ![ngx_http_conf](/images/nginx/ngx_http_conf.jpg)
 
