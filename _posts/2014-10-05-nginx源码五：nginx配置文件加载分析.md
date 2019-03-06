@@ -249,7 +249,11 @@ static ngx_command_t  ngx_http_commands[] = {
 ![ngx_http_conf](/images/nginx/ngx_conf3.jpg)
 
 到这一步，我们已经知道 解析完 http{} 这个block后，存储到配置中；图中也标识出来，通过`ngx_http_core_module`对应的配置管理多个server的conf，那么下一步需要做的是
-1. 解决如何通过host快速找到server
+1. 解决如何通过host快速找到server以及server的所有配置信息
 2. 找到server后，如何快速找到location
 
-满足这两点，就要"修改"目前的数据结构，因为array的方式存获取各个server的conf，以及queue的方式获取location在多server配置、多location配置都存在问题
+**由于配置信息分散在各个上下文节点指向的配置数组中，所以，我们要做的第一步是配置信息的merge，下图是`配置信息merge的过程`，红框就是merge好，取各个配置的地方。**
+
+![ngx_http_conf](/images/nginx/ngx_conf4.jpg)
+
+
