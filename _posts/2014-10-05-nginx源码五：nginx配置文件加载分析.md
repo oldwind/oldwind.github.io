@@ -256,4 +256,18 @@ static ngx_command_t  ngx_http_commands[] = {
 
 ![ngx_http_conf](/images/nginx/ngx_conf4.jpg)
 
+一个server对应理论上无限个location，我们看到前面的图示，location信息通过queue来串连，在接收到request的时候，如果依次去匹配查找location，性能肯定会存在问题，对此，nginx做了一个处理
+- 对于精确匹配和前缀匹配，构建一个三叉查找树
+- 如果精确匹配和前缀匹配都找不到location，会通过正则方式去查找(支持pcre库的前提下)
+
+构造三叉树和实现查找这里不在详细描述，放在后面一篇文章继续
+
+## 四. 总结
+
+本篇文章简单介绍了nginx配置文件的分析和配置信息存储的过程，在配置分析的过程中，还有三部分主要的内容
+- 构造location的静态树(三叉查找树) (ngx_http_init_static_location_trees)
+- nginx的request处理过程的状态机设计 (ngx_http_init_phase_handlers)
+- 将事件和处理的server关联的过程 (ngx_http_optimize_servers)
+在后面将继续分析这三部分内容
+
 
