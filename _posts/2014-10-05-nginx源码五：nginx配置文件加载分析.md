@@ -177,7 +177,7 @@ static ngx_command_t  ngx_events_commands[] = {
 - http，server，location之间关系是一个多叉树结构
 ![ngx_http_conf](/images/nginx/ngx_conf2.jpg)
 
-- 配置的选择顺序按照 location 到 server 到 http先后关系，例如 root这个指令，它可以在 http， server， location三个级别做配置；那么对于location匹配到的请求，选择配置信息的顺序是，如果 location {} 里面配置了，选用location下面，否则就是 server {}, 在次是http {}
+- 配置的选择顺序按照 location 到 server 到 http先后关系，例如 root这个指令，它可以在 http， server， location三个级别做配置；那么对于location匹配到的请求，选择配置信息的顺序是，如果 location {} 里面配置了，选用location下面，否则就是 server {}, 在次是http {}, 如果都么有配置，那么必定有一个默认值
 {% highlight c %}
     { ngx_string("root"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
@@ -187,6 +187,35 @@ static ngx_command_t  ngx_events_commands[] = {
       0,
       NULL },
 {% endhighlight %}
-- 理论上，nginx可以配置无限个server，每个server又可以配置无限多个location，这里面对于一个请求，如何快速找到对应server里面的location，我们可以看一下下面的图：
+
+- 理论上，nginx可以配置无限个server，每个server又可以配置无限多个location。那么我们考虑一个请求过来，先要找到对应的server，在找到对应的location，根据location的配置确定处理逻辑；配置信息的存储实际第一步是按照下图的关系做了原始存储，那么存储的流程是什么样的呢？  我们接着上面的配置文件做分析
+
 ![ngx_http_conf](/images/nginx/ngx_http_conf.jpg)
+
+- `12. nginx分析到http指令，执行http的指令 ngx_http_block`
+{% highlight c %}
+static ngx_command_t  ngx_http_commands[] = {
+
+    { ngx_string("http"),
+      NGX_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
+      ngx_http_block,
+      0,
+      0,
+      NULL },
+
+      ngx_null_command
+};
+{% endhighlight %}
+
+- `13. ngx_http_block在处理的时候，考虑到内部还有server block 和 location block的特点，做了下面一个设计`
+    - 设计一个上下文的节点数据结构，包含三个成员指针，main_conf、srv_conf、loc_conf
+    - 上下文节点的三个成员指针，指向的是三个 NGX_HTTP_MODULE 的插件的配置指针数组，如上图图示
+
+- `14. 继续http的block内的配置分析`
+    - cf->module_type = NGX_HTTP_MODULE;
+    - cf->cmd_type = NGX_HTTP_MAIN_CONF;
+
+- `15. 分析到 default_type 指令，和前面的流程一样，找到 NGX_HTTP_MODULE 类型下的对应的插件 ngx_http_core_module`
+
+- `16. 执行ngx_http_core_module的指令集合`
 
