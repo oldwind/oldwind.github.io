@@ -268,6 +268,7 @@ static ngx_command_t  ngx_http_commands[] = {
 - 构造location的静态树(三叉查找树) (ngx_http_init_static_location_trees)
 - nginx的request处理过程的状态机设计 (ngx_http_init_phase_handlers)
 - 将事件和处理的server关联的过程 (ngx_http_optimize_servers)
+
 在后面将继续分析这三部分内容
 
 
