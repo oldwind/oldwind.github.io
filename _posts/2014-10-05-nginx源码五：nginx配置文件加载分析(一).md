@@ -1,6 +1,6 @@
 ---
 layout: content
-title: nginx源码五：nginx配置加载分析
+title: nginx源码五(一)：nginx配置加载分析
 status: 1
 complete: 100% 
 category: nginx
