@@ -177,7 +177,7 @@ static ngx_command_t  ngx_events_commands[] = {
 - http，server，location之间关系是一个多叉树结构
 ![ngx_http_conf](/images/nginx/ngx_conf2.jpg)
 
-- 配置的选择顺序按照 location 到 server 到 http先后关系，例如 root这个指令，它可以在 http， server， location三个级别做配置；那么对于location匹配到的请求，选择配置信息的顺序是，如果 location {} 里面配置了，选用location下面，否则就是 server {}, 在次是http {}, 如果都么有配置，那么必定有一个默认值
+- 配置的选择顺序按照 location 到 server 到 http先后关系，例如 root这个指令，它可以在 http， server， location三个级别做配置；那么对于location匹配到的请求，选择配置信息的顺序是，如果 location {} 里面配置了，选用location{}，否则就是 server {}, 在次是http {}, 如果都么有配置，那么必定有一个默认值
 {% highlight c %}
     { ngx_string("root"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
@@ -216,6 +216,36 @@ static ngx_command_t  ngx_http_commands[] = {
     - cf->cmd_type = NGX_HTTP_MAIN_CONF;
 
 - `15. 分析到 default_type 指令，和前面的流程一样，找到 NGX_HTTP_MODULE 类型下的对应的插件 ngx_http_core_module`
+- `16. 执行ngx_http_core_module的 default_type 指令， set用户配置`
+- `17. 继续server的block的处理和location的block处理，流程是一样的`
 
-- `16. 执行ngx_http_core_module的指令集合`
+<br/>
+**这里有一个非常关键的问题，我们在后面写nginx的模块的时候需要关注的，关于写一个插件的时候指令的设定要求，从上面那张图可以看出，server{} 内 main_conf 和 http{} 的main_conf是共用的，location{}里面的main_conf，srv_conf和 server{} 里面的main_conf 和 srv_conf是共用的，那么需要关注：**
 
+1. 在配置一个指令的时候，如果配置了http{}，server{}，location{}三处都可以设定指令，那么这个指令配置的信息应该放在loc_conf指向的配置数组中
+2. 在配置一个指令的时候，如果配置了http{}，server{} 两处可以设定指令，那么这个指令配置的信息应该放在srv_conf指向的配置数组中
+
+**从下面的代码可以看出来，这两个规范，代码中实际没有严格要求，但是如果写nginx插件的时候，没有按照这个要求，会导致location{}内配置命令的相互干扰**
+
+{% highlight c %}
+{ ngx_string("connection_pool_size"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1, //支持 http{}，server{}内设定， 支持一个参数
+      ngx_conf_set_size_slot,  // set方法
+      NGX_HTTP_SRV_CONF_OFFSET,    // 存在 srv_conf
+      offsetof(ngx_http_core_srv_conf_t, connection_pool_size), //配置数据结构里面的存放位置, 通过偏移量方式
+      &ngx_http_core_pool_size_p },
+
+{ ngx_string("types_hash_max_size"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1, //支持 http{}，server{}，location{}内设定
+      ngx_conf_set_num_slot,   
+      NGX_HTTP_LOC_CONF_OFFSET,   // 存在 loc_conf
+      offsetof(ngx_http_core_loc_conf_t, types_hash_max_size), 
+      NULL },
+
+{% endhighlight %}
+
+下面，我们在画一张图来标识用户指令配置的存储位置
+
+![ngx_http_conf](/images/nginx/ngx_conf3.jpg)
+
+到这一步，我们已经知道分析完 http{} 这个block后，nginx.conf相应的配置的存储位置
