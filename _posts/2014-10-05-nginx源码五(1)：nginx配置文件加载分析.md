@@ -188,11 +188,11 @@ static ngx_command_t  ngx_events_commands[] = {
 
 - 理论上，nginx可以配置无限个server，每个server又可以配置无限多个location。那么我们考虑一个请求过来，先要找到对应的server，在找到对应的location，根据location的配置确定处理逻辑；配置信息的存储实际第一步是按照下图的关系做了原始存储，那么存储的流程是什么样的呢？  
 
-![ngx_http_conf](/images/nginx/ngx_http_conf3.jpg)
+![ngx_http_conf](/images/nginx/ngx_conf3.jpg)
 
 - 下面一张图是对应各个分析到http{}， server{}， location{} 指令的结构图， 后面接着上面的配置文件做分析
 
-![ngx_http_conf](/images/nginx/ngx_http_conf4.jpg)
+![ngx_http_conf](/images/nginx/ngx_conf4.jpg)
 
 
 - `12. nginx分析到http指令，执行http的指令 ngx_http_block`
