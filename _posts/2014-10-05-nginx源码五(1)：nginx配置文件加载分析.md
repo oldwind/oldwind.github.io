@@ -143,7 +143,7 @@ keepalive_timeout  65;
     - conf.cmd_type = NGX_MAIN_CONF;
 - `5. 分析到第一个指令"worker_processes"， 遍历查找所有 NGX_CORE_MODULE 插件，指令类型是 NGX_MAIN_CONF 的指令，执行指令对应的handle`
 - `6. 对于"worker_processes"， 因为前面已经创建配置信息，配置信息获取方式如下图，所以这里可以直接更新到ngx_core_conf_t类型的结构体里`
-![ngx_http_conf](/images/nginx/ngx_conf.jpg)
+![ngx_http_conf](/images/nginx/ngx_conf1.jpg)
 
 - `7. 配置文件继续分析，分析到event指令 和 "{"`
 - `8. 调起event指令的处理handle "ngx_events_block"`
@@ -186,9 +186,14 @@ static ngx_command_t  ngx_events_commands[] = {
       NULL },
 {% endhighlight %}
 
-- 理论上，nginx可以配置无限个server，每个server又可以配置无限多个location。那么我们考虑一个请求过来，先要找到对应的server，在找到对应的location，根据location的配置确定处理逻辑；配置信息的存储实际第一步是按照下图的关系做了原始存储，那么存储的流程是什么样的呢？  我们接着上面的配置文件做分析
+- 理论上，nginx可以配置无限个server，每个server又可以配置无限多个location。那么我们考虑一个请求过来，先要找到对应的server，在找到对应的location，根据location的配置确定处理逻辑；配置信息的存储实际第一步是按照下图的关系做了原始存储，那么存储的流程是什么样的呢？  
 
-![ngx_http_conf](/images/nginx/ngx_http_conf.jpg)
+![ngx_http_conf](/images/nginx/ngx_http_conf3.jpg)
+
+- 下面一张图是对应各个分析到http{}， server{}， location{} 指令的结构图， 后面接着上面的配置文件做分析
+
+![ngx_http_conf](/images/nginx/ngx_http_conf4.jpg)
+
 
 - `12. nginx分析到http指令，执行http的指令 ngx_http_block`
 {% highlight c %}
@@ -244,7 +249,7 @@ static ngx_command_t  ngx_http_commands[] = {
 
 下面，我们在画一张图来标识用户指令配置的存储位置
 
-![ngx_http_conf](/images/nginx/ngx_conf3.jpg)
+![ngx_http_conf](/images/nginx/ngx_conf5.jpg)
 
 到这一步，我们已经知道 解析完 http{} 这个block后，存储到配置中；图中也标识出来，通过`ngx_http_core_module`对应的配置管理多个server的conf，那么下一步需要做的是
 1. 解决如何通过host快速找到server以及server的所有配置信息
@@ -252,7 +257,7 @@ static ngx_command_t  ngx_http_commands[] = {
 
 **由于配置信息分散在各个上下文节点指向的配置数组中，所以，我们要做的第一步是配置信息的merge，下图是`配置信息merge的过程`，红框就是merge好，取各个配置的地方。**
 
-![ngx_http_conf](/images/nginx/ngx_conf4.jpg)
+![ngx_http_conf](/images/nginx/ngx_conf6.jpg)
 
 一个server对应理论上无限个location，我们看到前面的图示，location信息通过queue来串连，在接收到request的时候，如果依次去匹配查找location，性能肯定会存在问题，对此，nginx做了一个处理
 - 对于精确匹配和前缀匹配，构建一个三叉查找树
