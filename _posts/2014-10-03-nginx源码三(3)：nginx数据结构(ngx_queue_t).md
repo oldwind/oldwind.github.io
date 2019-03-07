@@ -1,7 +1,7 @@
 ---
 layout: content
 title: nginx源码三(3)：nginx数据结构(ngx_queue_t)
-status: 2
+status: 1
 complete: 10% 
 category: nginx
 ---
@@ -45,7 +45,6 @@ struct ngx_queue_s {
 ![ngx_queue](/images/nginx/ngx_queue3.jpg)
 
 
-
 ## 三. ngx_queue_t的使用
 
 我们选择一个使用了队列的结构体来说明一下，nginx中队列的使用，在nginx的配置分析中，关于location的配置信息使用到了队列， 我们可以看一下location的数据结构
@@ -63,3 +62,20 @@ typedef struct {
 {% endhighlight %}
 
 ![ngx_queue](/images/nginx/ngx_queue4.jpg)
+
+`ngx_queue_t list;    ngx_queue_t queue;`， 作为`ngx_http_location_queue_t`的成员变量，首先说明如何获取其它成员信息
+
+{% highlight c %}
+#define ngx_queue_data(q, type, link)  (type *) ((u_char *) q - offsetof(type, link))
+{% endhighlight %}
+
+我们假设有一个成员变量是 ngx_http_location_queue_t 类型， 知道list的指针 `ngx_queue_t *`，如何获取 `name`信息呢，可以按照下面的代码
+{% highlight c %}
+// q 是 ngx_queue_t * 类型指针，在list位置存储
+ngx_http_location_queue_t *data = ngx_queue_data(q, ngx_http_location_queue_t, list )
+{% endhighlight %}
+
+
+## 四. 总结
+
+nginx的queue设计带来非常灵活的操作，操作方法都非常简单明晰，包括，queue的初始化、插入、删除、查找中间位置等等，这里不在详细叙述。总得来说，queue的设计还是带来新的思考，一种耳目一新的感觉
