@@ -19,7 +19,7 @@ category: nginx
 
 ## 二.nginx指令的嵌套问题
 
-我们先看一下nginx的`command`数据结构，同时做了注释
+我们先看一下nginx的`command`数据结构，我在后面做了注释
 {% highlight c %}
 struct ngx_command_s {
     ngx_str_t             name; // 指令名称
@@ -31,12 +31,59 @@ struct ngx_command_s {
 };
 {% endhighlight %}
 
+在这里面，`ngx_command_s` 的 `type` 成员变量是最复杂的，nginx在指令分析中，会根据type的类型做相应的处理，`type`有各种类型，主要在这几个方面
+- 1、参数方面，设定一个指令接受参数的个数
+- 2、指令方面
+    - 指令的类型，是否是支持嵌套形式的指令
+    - 指令接收参数的要求，参数要求的个数，一个参数还是多个参数，是否支持bool等等
+- 3、指令类型在配置参数存储位置的影响
+
+下面是一张图，标识nginx的command如何通过nginx_uint_t类型来标识不同的类型，一个nginx_uint_t类型占四个字节，nginx采用各个字节来存储不同的类型。同时可以通过 或的方式来标识各个类型的集合
+
+![ngx_conf](/images/nginx/ngx_cmd2.jpg)
+
+
+**下面是对各个类型的一个注释**
+{% highlight c %}
+#define NGX_CONF_NOARGS      0x00000001    // 没有参数
+#define NGX_CONF_TAKE1       0x00000002    // 1个参数
+#define NGX_CONF_TAKE2       0x00000004    // 2个参数
+#define NGX_CONF_TAKE3       0x00000008    // 3个参数
+#define NGX_CONF_TAKE4       0x00000010    // 4个参数
+#define NGX_CONF_TAKE5       0x00000020    // 5个参数
+#define NGX_CONF_TAKE6       0x00000040    // 6个参数
+#define NGX_CONF_TAKE7       0x00000080    // 7个参数
+
+#define NGX_CONF_BLOCK       0x00000100    // 指令支持嵌入
+#define NGX_CONF_FLAG        0x00000200    // 指令支持 on, off
+#define NGX_CONF_ANY         0x00000400    // 指令
+#define NGX_CONF_1MORE       0x00000800    // 指令最少要1个参数
+#define NGX_CONF_2MORE       0x00001000    // 指令最少要2个参数
+#define NGX_CONF_MULTI       0x00000000     /* compatibility */
+
+#define NGX_DIRECT_CONF      0x00010000    // 
+#define NGX_MAIN_CONF        0x01000000    // 
+#define NGX_ANY_CONF         0x0F000000    // 
+{% endhighlight %}
+
+
+![ngx_conf](/images/nginx/ngx_cmd3.jpg)
+
+
+![ngx_conf](/images/nginx/ngx_cmd4.jpg)
+
+
+
+
+
+
 
 
 
 
 
 {% highlight c %}
+
 static ngx_int_t
 ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 {
