@@ -268,7 +268,8 @@ static ngx_command_t  ngx_http_commands[] = {
 
 ## 四. 总结
 
-本篇文章简单介绍了常规的nginx配置文件的分析和配置信息存储的过程，在配置分析的过程中，还有三部分主要的内容
+本篇文章简单介绍了常规的nginx配置文件的分析和配置信息存储的过程，在配置分析的过程中，还有下面的主要的内容
+- 如何实现指令的嵌套？指令的理解
 - 构造location的静态树(三叉查找树) (ngx_http_init_static_location_trees)
 - nginx的request处理过程的状态机设计 (ngx_http_init_phase_handlers)
 - 将事件和处理的server关联的过程 (ngx_http_optimize_servers)
