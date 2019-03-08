@@ -215,6 +215,7 @@ static ngx_command_t  ngx_http_commands[] = {
     - 上下文节点的三个成员指针，指向的是三个 NGX_HTTP_MODULE 的插件的配置指针数组，如上图图示
 
 - `14. 继续http的block内的配置分析`
+    - cf->ctx = ctx; // 上下文变化
     - cf->module_type = NGX_HTTP_MODULE;
     - cf->cmd_type = NGX_HTTP_MAIN_CONF;
 
@@ -267,7 +268,7 @@ static ngx_command_t  ngx_http_commands[] = {
 
 ## 四. 总结
 
-本篇文章简单介绍了nginx配置文件的分析和配置信息存储的过程，在配置分析的过程中，还有三部分主要的内容
+本篇文章简单介绍了常规的nginx配置文件的分析和配置信息存储的过程，在配置分析的过程中，还有三部分主要的内容
 - 构造location的静态树(三叉查找树) (ngx_http_init_static_location_trees)
 - nginx的request处理过程的状态机设计 (ngx_http_init_phase_handlers)
 - 将事件和处理的server关联的过程 (ngx_http_optimize_servers)

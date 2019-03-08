@@ -8,6 +8,14 @@ category: nginx
 
 ## 一.前言
 
+前面对`location {}`的配置分析起了一个头，实际上，location的指令非常复杂，体现在几个方面：
+1. nginx通过指令和指令的handle方式处理 `http`, `server`, `location`的层级关系，那么下面那几种层级关系的配置哪些是可以支持的呢？
+
+![ngx_location_conf](/images/nginx/ngx_location1.jpg)
+
+2. 请求来到后，需要找到server配置，找到server配置后，要找到对应的location配置，理论上loation配置支持无数个，从前面的代码可以看出来
+
+
 接着前面对配置文件的分析，我们知道一个server{}里面可以设定多个location {}， 那么请求来了，怎么找到对应的location {} 处理呢，依次去对比，如果location {} 配置的太多，性能会存在问题。
 
 在这里nginx采用了三叉树的方法，三叉树的特点是这样的：
