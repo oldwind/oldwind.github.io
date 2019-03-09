@@ -1,7 +1,7 @@
 ---
 layout: content
 title: nginx源码五(2)：nginx配置文件分析-指令的理解
-status: 3
+status: 1
 complete: 10% 
 category: nginx
 ---
@@ -66,51 +66,22 @@ struct ngx_command_s {
 #define NGX_ANY_CONF         0x0F000000    // 
 {% endhighlight %}
 
+`NGX_DIRECT_CONF`、`NGX_MAIN_CONF`、`NGX_ANY_CONF`的含义不是非常好描述，我们拿到几个代表性的配置块来看一下，参考下图，分别是
+- core模块
+- http {} 的分析
+- event {} 的分析
 
 ![ngx_conf](/images/nginx/ngx_cmd3.jpg)
 
+`NGX_DIRECT_CONF`、`NGX_MAIN_CONF`、`NGX_ANY_CONF`影响的是用户配置信息的设定，这里的思考大概是这样的：
+- 1、对于`NGX_DIRECT_CONF`存在配置中全局作用域的command，例如 `daemon` `master_process` 这类型的指令，分析到这类型的指令，拿着上下文的节点，可以直接找到指令所需要配置的位置去设定
+- 2、`NGX_MAIN_CONF` 可以用于支持一级上下文节点的存储，可以参考下面图，对于分析到 http {}， 那么http的上下文节点指针要存在上一级指针数组中
+- 3、其它的配置，基本思路是针对不同上下文节点，通过偏移拿到配置的头节点
+可以参考下图
 
 ![ngx_conf](/images/nginx/ngx_cmd4.jpg)
 
-
-
-
-
-
-
-
-
-
-
-{% highlight c %}
-
-static ngx_int_t
-ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
-{
-    ...
-    for (i = 0; ngx_modules[i]; i++) {
-        cmd = ngx_modules[i]->commands;
-        ...
-        for ( /* void */ ; cmd->name.len; cmd++) {
-            ...
-            // 上下文的类型是否一致
-            if (!(cmd->type & cf->cmd_type)) {
-                continue;
-            }
-            ...
-        }
-    }
-
-    if (found) {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "\"%s\" directive is not allowed here", name->data);
-        return NGX_ERROR;
-    }
-    ...
-}
-{% endhighlight %}
-
-
+具体可以参考下面的代码实现
 
 {% highlight c %}
 static ngx_int_t
@@ -135,18 +106,63 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 {% endhighlight %}
 
 
-## 三.nginx的location查找算法
+## 三. 提出问题的回答
 
-接着前面对配置文件的分析，我们知道一个server{}里面可以设定多个location {}， 那么请求来了，怎么找到对应的location {} 处理呢，依次去对比，如果location {} 配置的太多，性能会存在问题。
+我们回答最开始的问题，解答一下，`location是可以无限嵌套的，前提是前缀一致`，nginx在实现这个功能是非常有意思的，为什么这样做，原因很难理解。
 
-在这里nginx采用了三叉树的方法，三叉树的特点是这样的：
+但是在实现上，http{} 作用域内哪些指令会被执行，nginx通过 上面说的 cmd 的 cmd_type 来管理， 我们来看 server指令和 location指令，可以发现location指令在做conf的parse时候，会支持 NGX_HTTP_LOC_CONF的模块，这是location能嵌套的原因
 
-1. 比字典树省空间
-2. 搜索效率比较高
+{% highlight c %}
+    cf->module_type = NGX_HTTP_MODULE;
+    cf->cmd_type = NGX_HTTP_MAIN_CONF;
+    rv = ngx_conf_parse(cf, NULL);
+{% endhighlight %}
 
-nginx在location匹配的时候，还遵循下面的流程
 
-精确匹配  ===> 前缀匹配 ===> 正则匹配
+{% highlight c %}
+    { ngx_string("server"),
+      NGX_HTTP_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
+      ngx_http_core_server,
+      0,
+      0,
+      NULL },
+{% endhighlight %}
 
-这一切是怎么实现的呢？ 这是本章的重点：
+{% highlight c %}
+    { ngx_string("location"),
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_BLOCK|NGX_CONF_TAKE12,
+      ngx_http_core_location,
+      NGX_HTTP_SRV_CONF_OFFSET,
+      0,
+      NULL },
+{% endhighlight %}
+
+
+{% highlight c %}
+static ngx_int_t
+ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
+{
+    ...
+    found = 0;
+    for (i = 0; ngx_modules[i]; i++) {
+        cmd = ngx_modules[i]->commands;
+        ...
+        for ( /* void */ ; cmd->name.len; cmd++) {
+            ...
+            // 指令类型和
+            if (!(cmd->type & cf->cmd_type)) {
+                continue;
+            }
+            ...
+        }
+    }
+
+    if (found) {
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                           "\"%s\" directive is not allowed here", name->data);
+        return NGX_ERROR;
+    }
+    ...
+}
+{% endhighlight %}
 
