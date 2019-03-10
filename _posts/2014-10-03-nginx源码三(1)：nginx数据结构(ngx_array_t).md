@@ -1,7 +1,7 @@
 ---
 layout: content
 title: nginx源码三(1)：nginx数据结构(ngx_array_t)
-status: 3
+status: 1
 complete: 10% 
 category: nginx
 ---
