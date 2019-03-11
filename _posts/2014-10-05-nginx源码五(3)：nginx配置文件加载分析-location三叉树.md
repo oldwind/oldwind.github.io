@@ -8,9 +8,9 @@ category: nginx
 
 ## 一.前言
 
-对于nginx来说，请求来到后，需要找到server配置，找到server配置后，要找到对应的location配置，理论上loation配置支持无数个，因为从前面的代码可以看出来，分析到location指令后，是独立的申请内存，不同location是通过`ngx_queue_t`来串联起来的，并没有限制个数，那么在这个时候，location的匹配规则是什么？处理的流程是什么样的
 
-这些都是本篇文章探讨的内容，先讨论nginx的指令嵌套问题
+
+
 
 ## 二.nginx指令的嵌套问题
 
