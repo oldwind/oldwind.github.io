@@ -108,7 +108,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 
 ## 三. 提出问题的回答
 
-我们回答最开始的问题，解答一下，`location是可以无限嵌套的，前提是前缀一致`，nginx在实现这个功能是非常有意思的，为什么这样做，原因很难理解。
+我们回答最开始的问题，解答一下，`location是可以无限嵌套的，但是有些条件`，nginx在实现这个功能是非常有意思的，为什么这样做，实现的场景是啥，还不是非常理解
 
 但是在实现上，http{} 作用域内哪些指令会被执行，nginx通过 上面说的 cmd 的 cmd_type 来管理， 我们来看 server指令和 location指令，可以发现location指令在做conf的parse时候，会支持 NGX_HTTP_LOC_CONF的模块，这是location能嵌套的原因
 
@@ -166,3 +166,35 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 }
 {% endhighlight %}
 
+nginx 规定了 location 的嵌套条件，可参考下面的代码
+- 如果父location 指令是 是精确匹配，locaton不能嵌套
+- 如果父location 指令是 @名称这种，不能发生嵌套匹配
+- 如果是 @名称这种，不能发生嵌套匹配
+- 嵌套匹配时候，和父location的参数，保持包含关系，例如 父location 是 /a， 子location 必须是 /a* 这种
+
+{% highlight c %}
+        if (pclcf->exact_match) {
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                               "location \"%V\" cannot be inside "
+                               "the exact location \"%V\"",
+                               &clcf->name, &pclcf->name);
+            return NGX_CONF_ERROR;
+        }
+
+        if (pclcf->named) {
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                               "location \"%V\" cannot be inside "
+                               "the named location \"%V\"",
+                               &clcf->name, &pclcf->name);
+            return NGX_CONF_ERROR;
+        }
+
+        if (clcf->named) {
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                               "named location \"%V\" can be "
+                               "on the server level only",
+                               &clcf->name);
+            return NGX_CONF_ERROR;
+        }
+
+{% endhighlight %}

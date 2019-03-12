@@ -11,6 +11,8 @@ category: nginx
 
 
 
+exact(sorted) -> inclusive(sorted) -> regex -> named -> noname
+
 
 ## 二.nginx指令的嵌套问题
 
