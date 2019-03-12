@@ -8,10 +8,6 @@ category: nginx
 
 ## 一.前言
 
-mdd
-dddd
-ddddddd
-
 
 exact(sorted) -> inclusive(sorted) -> regex -> named -> noname
 
