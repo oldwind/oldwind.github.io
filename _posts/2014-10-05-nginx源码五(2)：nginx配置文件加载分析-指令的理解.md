@@ -166,11 +166,11 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 }
 {% endhighlight %}
 
-nginx 规定了 location 的嵌套条件，可参考下面的代码
-- 如果父location 指令是 是精确匹配，locaton不能嵌套
-- 如果父location 指令是 @名称这种，不能发生嵌套匹配
-- 如果是 @名称这种，不能发生嵌套匹配
-- 嵌套匹配时候，和父location的参数，保持包含关系，例如 父location 是 /a， 子location 必须是 /a* 这种
+**nginx 规定了 location 的嵌套条件，可参考下面的代码**
+- `如果父location 指令是 是精确匹配，locaton不能嵌套`
+- `如果父location 指令是 @名称这种，不能发生嵌套匹配`
+- `如果是 @名称这种，不能发生嵌套匹配`
+- `嵌套匹配时候，和父location的参数，保持包含关系，例如 父location 是 /a， 子location 必须是 /a* 这种`
 
 {% highlight c %}
         if (pclcf->exact_match) {
