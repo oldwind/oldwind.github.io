@@ -8,6 +8,8 @@ category: nginx
 
 ## 一.前言
 
+nginx的location
+
 
 exact(sorted) -> inclusive(sorted) -> regex -> named -> noname
 
