@@ -8,7 +8,45 @@ category: nginx
 
 ## 一.前言
 
-nginx的location
+我们在前面提到了nginx的指令分析，针对server {} 里面的 location {} 指令，平行的 location指令 和 嵌套的 location指令 之间都会通过 queue 的双向链表来进行串联， 如下图：
+
+![ngx_loc_tree_conf](/images/nginx/ngx_loctree1.jpeg)
+
+在建立双向链表关系后，下一步，nginx 在 `ngx_http_init_locations` 方法中做了 排序 和 queue 的切分的工作
+
+{% highlight c %}
+http {
+    server {
+        add_header  Content-Type 'text/html; charset=utf-8';
+        location / {
+           return 200 "0";
+        }
+
+        location = / {
+            return 200 "1";
+        }
+
+        location  /a {
+            return 200 "2";
+        }
+
+        location = /a {
+            return 200 "3";
+        }
+
+        location = /ab {
+            return 200 "4";
+        }
+
+        location /ab {
+            return 200 "5";
+        }
+    }
+}
+{% endhighlight %}
+
+
+
 
 
 exact(sorted) -> inclusive(sorted) -> regex -> named -> noname
