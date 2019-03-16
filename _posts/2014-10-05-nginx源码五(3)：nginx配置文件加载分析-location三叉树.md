@@ -12,7 +12,7 @@ category: nginx
 
 ![ngx_loc_tree_conf](/images/nginx/ngx_loctree1.jpeg)
 
-在建立双向链表关系后，下一步，nginx 在 `ngx_http_init_locations` 方法中做了 排序 和 queue 的切分的工作
+在建立双向链表关系后，下一步，nginx 在 `ngx_http_init_locations` 方法中做了 排序 和 queue 的切分的工作， 我们在这里选择构造一个例子来表述一下queue的情况
 
 {% highlight c %}
 http {
@@ -41,15 +41,24 @@ http {
         location /ab {
             return 200 "5";
         }
+
+        location @my {
+            return 200 "6";
+        }
+
+        location ~ /abc* {
+            return 200 "7";
+        }
     }
 }
 {% endhighlight %}
 
 
-
-
-
 exact(sorted) -> inclusive(sorted) -> regex -> named -> noname
+
+排序规则如下：
+1. 精确匹配 > 前缀匹配 > 正则匹配 > named类型匹配 > noname类型匹配
+
 
 
 ## 二.nginx指令的嵌套问题
