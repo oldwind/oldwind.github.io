@@ -13,8 +13,6 @@ category: nginx
 ![ngx_loc_tree_conf](/images/nginx/ngx_loctree1.jpeg)
 
 在建立双向链表关系后，下一步，nginx 会做一些什么操作呢？ 我们拿一个location 的事例来说一下
-
-
  
 {% highlight c %}
 http {
@@ -81,102 +79,16 @@ http {
 }
 {% endhighlight %}
 
-
-exact(sorted) -> inclusive(sorted) -> regex -> named -> noname
-
- /* "if () {}" block or limit_except */
-
-排序规则如下：
-1. 精确匹配 > 前缀匹配 > 正则匹配 > named类型匹配 > noname类型匹配
-
-精准匹配的规则如下
-1. 
-
-在 `ngx_http_init_locations` 方法中做了 排序 和 queue 的切分的工作， 我们在这里选择构造一个例子来表述一下queue的情况
-
+第一步的情况我们在前面已经说了，创建一个双向链表(ngx_queue_t)
 
 ## 二.nginx指令的嵌套问题
-
-nginx的指令嵌套重点关注两部分代码，一是
-
-{% highlight c %}
-struct ngx_command_s {
-    ngx_str_t             name;
-    ngx_uint_t            type;
-    char               *(*set)(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-    ngx_uint_t            conf;
-    ngx_uint_t            offset;
-    void                 *post;
-};
-{% endhighlight %}
-
-
-
-
-{% highlight c %}
-static ngx_int_t
-ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
-{
-    ...
-    for (i = 0; ngx_modules[i]; i++) {
-        cmd = ngx_modules[i]->commands;
-        ...
-        for ( /* void */ ; cmd->name.len; cmd++) {
-            ...
-            // 上下文的类型是否一致
-            if (!(cmd->type & cf->cmd_type)) {
-                continue;
-            }
-            ...
-        }
-    }
-
-    if (found) {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "\"%s\" directive is not allowed here", name->data);
-        return NGX_ERROR;
-    }
-    ...
-}
-{% endhighlight %}
-
-
-
-{% highlight c %}
-static ngx_int_t
-ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
-{
-    ...
-            if (cmd->type & NGX_DIRECT_CONF) {
-                conf = ((void **) cf->ctx)[ngx_modules[i]->index];
-
-            } else if (cmd->type & NGX_MAIN_CONF) {
-                conf = &(((void **) cf->ctx)[ngx_modules[i]->index]);
-
-            } else if (cf->ctx) {
-                confp = *(void **) ((char *) cf->ctx + cmd->conf);
-
-                if (confp) {
-                    conf = confp[ngx_modules[i]->ctx_index];
-                }
-            }
-    ...
-}
-{% endhighlight %}
+1. ngx_http_init_locations
+    ngx_queue_sort(locations, ngx_http_cmp_locations);
+    ngx_queue_split(locations, q, &tail);
+    ngx_queue_split(locations, named, &tail);
+    ngx_queue_split(locations, regex, &tail);
 
 
 ## 三.nginx的location查找算法
 
-接着前面对配置文件的分析，我们知道一个server{}里面可以设定多个location {}， 那么请求来了，怎么找到对应的location {} 处理呢，依次去对比，如果location {} 配置的太多，性能会存在问题。
-
-在这里nginx采用了三叉树的方法，三叉树的特点是这样的：
-
-1. 比字典树省空间
-2. 搜索效率比较高
-
-nginx在location匹配的时候，还遵循下面的流程
-
-精确匹配  ===> 前缀匹配 ===> 正则匹配
-
-这一切是怎么实现的呢？ 这是本章的重点：
 
