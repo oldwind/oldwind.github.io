@@ -1,7 +1,7 @@
 ---
 layout: content
 title: nginx源码五(3)：nginx配置文件分析-location三叉树
-status: 3
+status: 1
 complete: 10% 
 category: nginx
 ---
