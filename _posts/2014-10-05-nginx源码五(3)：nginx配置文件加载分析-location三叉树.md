@@ -22,7 +22,6 @@ category: nginx
 
 另外我们也去分析一下对于request请求的uri匹配一下
 
-
 为了便于理解，我在这里设计了一个location的示例，我们看一下三叉树的形成过程
  
 {% highlight c %}
@@ -203,10 +202,28 @@ struct ngx_http_location_tree_node_s {
 ![ngx_loc_tree_conf](/images/nginx/ngx_loc_tree.jpeg)
 
 
-## 八. 查找算法 ngx_http_core_find_static_location
+## 八.查找算法 ngx_http_core_find_static_location
 
-一个request请求过来，需要查找对应的location，如何管理这个查找过程是nginx设计的状态机做的管理，我们在下面一篇文章中分析，
+前面主要分析了nginx处理location指令的流程，location的配置信息存储分成多个部分；实际上在接收到request请求的时候，nginx要找到对应处理的location，重点分成下面两部分
+- 精确匹配规则和包含匹配规则在建立的location三叉树中。
+- 正则匹配规则。
 
+那么一个请求过来的时候，匹配的算法是怎么样的呢？重点可以看下面两处代码： 大致是这样的思路
+- 从三叉树中查找，
+    - 如果什么都查不到，返回 NGX_DECLINED
+    - 如果查找到精确匹配的规则，配置信息赋值给request对象，返回 NGX_OK
+    - 如果查到包含关系的匹配，配置信息赋值给request对象，返回 NGX_AGAIN，
+        - 递归 处理 location 的嵌套查询
+- 判断三叉树&嵌套查询结果，
+    - 返回是 NGX_OK 或者 NGX_DONE 直接返回
+    - 其它情况，继续流程
+- 判断查找到的配置是否支持继续进行正则匹配
+    - 不支持，返回前面结果
+    - 支持，进行正则匹配，
+        - 匹配成功
+            - 递归处理嵌套的匹配结果
+        - 未匹配到，返回错误
+    
 {% highlight c %}
 /*
  * NGX_OK       - exact or regex match
@@ -238,7 +255,7 @@ ngx_http_core_find_location(ngx_http_request_t *r)
 #if (NGX_PCRE)
         clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
-        noregex = clcf->noregex;
+        noregex = clcf->noregex; // 设定是否继续进行正则匹配
 #endif
 
         /* look up nested locations */
@@ -366,6 +383,12 @@ ngx_http_core_find_static_location(ngx_http_request_t *r,
     }
 }
 {% endhighlight %}
+
+1. 启动匹配，找到精确匹配结果，直接返回精确匹配的location配置
+2. 如果未找到精确匹配，找到包含关系，
+
+
+
 
 
 ## 九.总结
