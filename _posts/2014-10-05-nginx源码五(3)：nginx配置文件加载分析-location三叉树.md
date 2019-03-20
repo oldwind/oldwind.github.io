@@ -221,7 +221,7 @@ struct ngx_http_location_tree_node_s {
     - 不支持，返回前面结果
     - 支持，进行正则匹配，
         - 匹配成功
-            - 递归处理嵌套的匹配结果
+            - 递归处理正则匹配中嵌套的匹配结果
         - 未匹配到，返回错误
     
 {% highlight c %}
@@ -384,13 +384,55 @@ ngx_http_core_find_static_location(ngx_http_request_t *r,
 }
 {% endhighlight %}
 
-1. 启动匹配，找到精确匹配结果，直接返回精确匹配的location配置
-2. 如果未找到精确匹配，找到包含关系，
+
+单从代码看，理解还是比较困难，举个下面的例子，我们看看下面几个问题
+1. `/cab2ms 会匹配到哪个location`
+    - 返回 4
+
+2. `如果/ca配置去掉， /cab2ms 会匹配到哪个location` 
+    - 返回 9
+
+{% highlight c %}
+
+http {
+    server {
+        ## /c配置
+        location ^~ /c {
+            return 200 "9";
+        }
+
+        ## /ca配置
+        location /ca {
+            location ~ /cab[0-1]m* {
+
+                location ~ /cab[0-7]ms* {
+                    return 200 "1";
+                }
+                return 200 "2";
+            }
+
+            return 200 "3";
+        }
+
+        ## /cab[0-9]m* 配置
+        location ~ /cab[0-9]m* {
+            location ~ /cab[0-2]m* {
+                return 200 "4";
+            }
+
+            return 200 "5";
+        }
+    }
+} 
+{% endhighlight %}
 
 
+总体匹配还是 精确 > 正则 > 包含原则
 
 
 
 ## 九.总结
 
-一个请求发起到location {}，中间还要经历一层rewrite过程，rewrite是通过nginx的模块化来实现，在ngx_http_rewrite_module.c 中做了实现，我们在这里后面 <a href="/index.html#/nginx/2014/10/14/nginx源码十四(1)-nginx的rewrite模块分析.html" title="nginx源码十四(1)：nginx的rewrite模块分析">nginx源码十四(1)：nginx的rewrite模块分析</a> 在接着继续分析
+总的来说，nginx的location配置非常复杂，而且很难用语言概括，里面有些设计存在需要讨论的地方，例如，禁止正则匹配，`是否要具备继承性`，如果我们把包含关系理解成父子关系，那么包含关系的父节点禁止用正则匹配规则，子节点是否自动继承禁止用匹配呢
+
+另外，一个请求发起到location {}，中间还要经历一层rewrite过程，rewrite是通过nginx的模块化来实现，在ngx_http_rewrite_module.c 中做了实现，我们在这里后面 <a href="/index.html#/nginx/2014/10/14/nginx源码十四(1)-nginx的rewrite模块分析.html" title="nginx源码十四(1)：nginx的rewrite模块分析">nginx源码十四(1)：nginx的rewrite模块分析</a> 在接着继续分析
