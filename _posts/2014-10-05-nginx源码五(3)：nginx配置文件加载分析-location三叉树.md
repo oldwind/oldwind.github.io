@@ -99,32 +99,273 @@ server{} 指令内部的location {} 指令，是一对多的关系，同时locat
 
 ## 三.location指令的排序
 
-nginx通过queue去串联配置的location，下一步是对location进行排序，排序算法的实现，在前面关于ngx_queue_t的数据结构分析中，做了解释，简单说就是：
-1. ngx_queue_t实现自己的排序逻辑
-2. 使用的业务实现自己的比较逻辑
+nginx通过queue去串联配置的location，下一步是对location进行排序，排序算法的实现，在前面关于ngx_queue_t的数据结构分析中，做了分析，简单说就是：
+1. ngx_queue_t实现自己的排序算法，针对链表，nginx选择了`插入排序`的算法
+2. 使用的业务实现自己的比较算法，nginx设计location指令先后关系的比较算法是 ngx_http_cmp_locations
 
-nginx的排序逻辑采用的是插入排序的方案，
+我们看一下针对location指令的比较逻辑
+
+{% highlight c %}
+static ngx_int_t
+ngx_http_cmp_locations(const ngx_queue_t *one, const ngx_queue_t *two)
+{
+    ...
+    if (first->noname && !second->noname) {
+        /* shift no named locations to the end */
+        return 1;
+    }
+
+    ...
+    rc = ngx_filename_cmp(first->name.data, second->name.data,
+                          ngx_min(first->name.len, second->name.len) + 1);
+
+    if (rc == 0 && !first->exact_match && second->exact_match) {
+        /* an exact match must be before the same inclusive one */
+        return 1;
+    }
+
+    return rc;
+}
+{% endhighlight %}
+
+在这里，我们简单说一下这个比较算法实现的目标：
+1. noname类型的location放在最后
+2. named放在noname类型以前，同时named location之间有一个排序，排序原则按照 `asicc码顺序排序`
+3. 如果支持正则，正则排在named类型以前
+4. 包含类型和精确类型的location混排，但是保持有序，排序原则同时按照 `asicc码顺序排序`
+
+`asicc码顺序排序`是我这边单起的名字，没有找到专业术语，这里解释一下，例如对于 a, ab 排序，a > ab 排序原则是，先比较首字母，都是a，继续比较第二个字母，不存在设定asicc的值是0，然后 0 - 'b' < 0 所以 a 在 ab 前面
+
+下面一张图是针对前面的示例做的排序：
 
 ![ngx_loc_tree_conf](/images/nginx/ngx_loc_split1.jpeg)
 
 
 ## 四.location指令的切分
 
+排完序以后，location指令实际被做了几次切分，分别是 (精确匹配 + 包含类型匹配) + 正则匹配 + named类型匹配 + nonamed类型匹配，nginx下一步是切分，切分后，通过上下文配置的不同变量来管理。 这里不做详细描述，切分后可以参考一下下面的图：
+
 ![ngx_loc_tree_conf](/images/nginx/ngx_loc_split2.jpeg)
 
+
 ## 五.location指令的精确匹配和包含匹配的合并
+
+正则匹配和named匹配指令已经被切走了，那么剩余下来是 精确 + 包含类型匹配， 我们可以看一下下面的数据结构，做了注释
+
+{% highlight c %}
+typedef struct {
+    ngx_queue_t                      queue;       // 平级location之间的双向链表
+    ngx_http_core_loc_conf_t        *exact;       // 精确匹配 指向的 ngx_http_core_loc_conf_t 配置
+    ngx_http_core_loc_conf_t        *inclusive;   // 包含关系指向的 ngx_http_core_loc_conf_t 配置
+    ngx_str_t                       *name;        // location名字
+    u_char                          *file_name;   // 配置文件名 
+    ngx_uint_t                       line;  
+    ngx_queue_t                      list;        // 包含关系的开链指针
+} ngx_http_location_queue_t;
+{% endhighlight %}
+
+我们可以看到，`ngx_http_location_queue_t` 中可以支持精确和包含关系的 ngx_http_core_loc_conf_t 配置，所以，在这步，nginx做了一件是，就是合并，例如，示例中的 `location /` 和 `location =/` 合并到一个`ngx_http_location_queue_t` 中。
 
 ![ngx_loc_tree_conf](/images/nginx/ngx_loc_exac.jpeg)
 
 ## 六.location指令生成包含关系的list
 
+做完上面的操作后，nginx针对包含关系，选择了开链的处理方式，如下图：
+
 ![ngx_loc_tree_conf](/images/nginx/ngx_loc_list.jpeg)
 
 ## 七.location的三叉树形成
 
+终于到了最后一步，构造nginx 的location 三叉树。我们先看一下树节点的数据结构
+
+{% highlight c %}
+struct ngx_http_location_tree_node_s {
+    ngx_http_location_tree_node_t   *left;  // assicc 值小
+    ngx_http_location_tree_node_t   *right; // assicc 值大
+    ngx_http_location_tree_node_t   *tree;  // 包含关系
+
+    ngx_http_core_loc_conf_t        *exact;  
+    ngx_http_core_loc_conf_t        *inclusive;
+
+    u_char                           auto_redirect;
+    u_char                           len;
+    u_char                           name[1];
+};
+{% endhighlight %}
+
+对于前面生成的list，nginx创建树，按照下面的流程递归处理：
+1. 获取queue中的中间位置节点(q)作为根节点。切成三部分，第一部分是q的左边作为左子树，第二部分是q，第三部分是q的右边称为右子树，q的包含关系作为tree
+2. 递归处理左子树、右子树、tree部分
+3. 所有处理中，如果只剩下queue的节点，上图list的红色部分，return出来
+
+下图则是示例的形成结果，实际上还有一点，就是，为了节约空间，树在存储的时候，按照前缀方式做了存储设计
+
 ![ngx_loc_tree_conf](/images/nginx/ngx_loc_tree.jpeg)
 
+
 ## 八. 查找算法 ngx_http_core_find_static_location
+
+一个request请求过来，需要查找对应的location，如何管理这个查找过程是nginx设计的状态机做的管理，我们在下面一篇文章中分析，
+
+{% highlight c %}
+/*
+ * NGX_OK       - exact or regex match
+ * NGX_DONE     - auto redirect
+ * NGX_AGAIN    - inclusive match
+ * NGX_ERROR    - regex error
+ * NGX_DECLINED - no match
+ */
+
+static ngx_int_t
+ngx_http_core_find_location(ngx_http_request_t *r)
+{
+    ngx_int_t                  rc;
+    ngx_http_core_loc_conf_t  *pclcf;
+#if (NGX_PCRE)
+    ngx_int_t                  n;
+    ngx_uint_t                 noregex;
+    ngx_http_core_loc_conf_t  *clcf, **clcfp;
+
+    noregex = 0;
+#endif
+
+    pclcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
+
+    rc = ngx_http_core_find_static_location(r, pclcf->static_locations);
+
+    if (rc == NGX_AGAIN) {
+
+#if (NGX_PCRE)
+        clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
+
+        noregex = clcf->noregex;
+#endif
+
+        /* look up nested locations */
+
+        rc = ngx_http_core_find_location(r);
+    }
+
+    if (rc == NGX_OK || rc == NGX_DONE) {
+        return rc;
+    }
+
+    /* rc == NGX_DECLINED or rc == NGX_AGAIN in nested location */
+
+#if (NGX_PCRE)
+
+    if (noregex == 0 && pclcf->regex_locations) {
+
+        for (clcfp = pclcf->regex_locations; *clcfp; clcfp++) {
+
+            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                           "test location: ~ \"%V\"", &(*clcfp)->name);
+
+            n = ngx_http_regex_exec(r, (*clcfp)->regex, &r->uri);
+
+            if (n == NGX_OK) {
+                r->loc_conf = (*clcfp)->loc_conf;
+
+                /* look up nested locations */
+
+                rc = ngx_http_core_find_location(r);
+
+                return (rc == NGX_ERROR) ? rc : NGX_OK;
+            }
+
+            if (n == NGX_DECLINED) {
+                continue;
+            }
+
+            return NGX_ERROR;
+        }
+    }
+#endif
+
+    return rc;
+}
+{% endhighlight %}
+
+
+{% highlight c %}
+static ngx_int_t
+ngx_http_core_find_static_location(ngx_http_request_t *r,
+    ngx_http_location_tree_node_t *node)
+{
+    u_char     *uri;
+    size_t      len, n;
+    ngx_int_t   rc, rv;
+
+    len = r->uri.len;
+    uri = r->uri.data;
+
+    rv = NGX_DECLINED;
+
+    for ( ;; ) {
+
+        if (node == NULL) {
+            return rv;
+        }
+
+        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                       "test location: \"%*s\"", node->len, node->name);
+
+        n = (len <= (size_t) node->len) ? len : node->len;
+
+        rc = ngx_filename_cmp(uri, node->name, n);
+
+        if (rc != 0) {
+            node = (rc < 0) ? node->left : node->right;
+
+            continue;
+        }
+
+        if (len > (size_t) node->len) {
+
+            if (node->inclusive) {
+
+                r->loc_conf = node->inclusive->loc_conf;
+                rv = NGX_AGAIN;
+
+                node = node->tree;
+                uri += n;
+                len -= n;
+
+                continue;
+            }
+
+            /* exact only */
+
+            node = node->right;
+
+            continue;
+        }
+
+        if (len == (size_t) node->len) {
+
+            if (node->exact) {
+                r->loc_conf = node->exact->loc_conf;
+                return NGX_OK;
+
+            } else {
+                r->loc_conf = node->inclusive->loc_conf;
+                return NGX_AGAIN;
+            }
+        }
+
+        /* len < node->len */
+
+        if (len + 1 == (size_t) node->len && node->auto_redirect) {
+
+            r->loc_conf = (node->exact) ? node->exact->loc_conf:
+                                          node->inclusive->loc_conf;
+            rv = NGX_DONE;
+        }
+
+        node = node->left;
+    }
+}
+{% endhighlight %}
 
 
 ## 九.总结
