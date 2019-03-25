@@ -1,6 +1,6 @@
 ---
 layout: content
-title: nginx源码五(3)：nginx配置文件分析-location三叉树
+title: nginx源码五(3)：nginx配置文件分析-location前缀树
 status: 1
 complete: 10% 
 category: nginx
@@ -18,7 +18,7 @@ category: nginx
 - 3.location指令的切分
 - 4.location精确匹配和包含匹配的合并
 - 5.处理location的包含关系构成list
-- 6.location的三叉树形成
+- 6.location的三叉树(前缀树)形成
 
 另外我们也去分析一下对于request请求的uri匹配一下
 
