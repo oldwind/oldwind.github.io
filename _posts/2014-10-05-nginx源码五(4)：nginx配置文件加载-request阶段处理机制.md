@@ -31,15 +31,18 @@ category: nginx
 
 其实思考清楚这些问题，基本上，对于nginx处理request请求，有一个非常好的理解；
 - `病例本` 是各个科室之间消息传递的载体，对于nginx来说，它构造了一个request对象，来处理reuqest请求，以及记录在各个阶段处理的结果
-- `划分区域` 是划繁为简，分工明确，如果不分科室，一个患者来了，
-
-
-
-
-
+- `划分区域` 是划繁为简，分工明确，如果不分科室，一个患者来了，捋不清楚先后关系，找不到科室，将是非常的耗费时间
+- `管理next`
 
 
 ## 二.流程
+
+凡事都是一理，架构的设计和日常生活也不外乎，我们这里看看nginx在处理请求的时候，是怎么设计流程的。
+
+
+
+
+
 1. 创建
 2. module分析后， postconfig
 3. 初始化
@@ -85,4 +88,23 @@ struct ngx_command_s {
 
 
 
+
+序号	阶段	功能	注册的模块
+0	NGX_HTTP_POST_READ_PHASE		ngx_http_realip_module
+1	NGX_HTTP_SERVER_REWRITE_PHASE	server级别的url重写阶段	ngx_http_rewrite_module
+2	NGX_HTTP_FIND_CONFIG_PHASE	查找location阶段	
+3	NGX_HTTP_REWRITE_PHASE	location级别的url重写阶段，可被执行多次	ngx_http_rewrite_module
+4	NGX_HTTP_POST_REWRITE_PHASE		
+5	NGX_HTTP_PREACCESS_PHASE		"ngx_http_degradation_module
+ngx_http_limit_conn_module
+ngx_http_limit_req_module
+ngx_http_realip_module"
+6	NGX_HTTP_ACCESS_PHASE		"ngx_http_access_module
+ngx_http_auth_basic_module
+ngx_http_auth_request_module
+"
+7	NGX_HTTP_POST_ACCESS_PHASE		
+8	NGX_HTTP_TRY_FILES_PHASE		
+9	NGX_HTTP_CONTENT_PHASE	内容生成阶段	
+10	NGX_HTTP_LOG_PHASE	记录访问日志阶段	ngx_http_log_module
 
