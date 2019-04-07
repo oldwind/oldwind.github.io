@@ -44,6 +44,8 @@ category: nginx
 - 第三阶段是返回处理结果的阶段。
 
   
+
+  
 1. 创建
 2. module分析后， postconfig
 3. 初始化
