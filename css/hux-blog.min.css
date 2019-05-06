@@ -46,9 +46,9 @@
 }
 
 .sidebar-container .short-about img {
-    width: 80%;
+    width: 96%;
     display: block;
-    border-radius: 5px;
+    border-radius: 0px;
     margin-bottom: 20px
 }
 
@@ -510,7 +510,7 @@ pre code {
 .intro-header .post-heading .subheading,
 .intro-header .post-heading .meta {
     line-height: 1.1;
-    display: block
+    /* display: block */
 }
 
 .intro-header .post-heading .subheading {
@@ -536,7 +536,7 @@ pre code {
 
 @media only screen and (min-width:768px) {
     .intro-header .post-heading h1 {
-        font-size: 55px
+        font-size: 45px
     }
 
     .intro-header .post-heading .subheading {
