@@ -1,31 +1,59 @@
-<!-- Page Content -->
-<div class="container" style="width: 99%;">
-  <div id="main">
-    <div class="row">
-        <div style="text-align: center; font: 1.75em sans-serif; margin-bottom: 5px">
-            {{ page.title }}                
+---
+layout: default
+---
+
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header {
+        background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        {% for tag in page.tags %}
+                        <a class="tag" href="{{ site.baseurl }}/tags/#{{ tag }}" title="{{ tag }}">{{ tag }}</a>
+                        {% endfor %}
+                    </div>
+                    <h1>{{ page.title }}</h1>
+                    {% comment %} if page.subtitle {% endcomment %}
+                    <h2 class="subheading">{{ page.subtitle }}</h2>
+                    {% comment %} endif {% endcomment %}
+                    <span class="meta">Posted by
+                        {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} on
+                        {{ page.date | date: "%B %-d, %Y" }}</span>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="row">
-        <div style="text-align: right; font: 0.75em sans-serif; margin-bottom: 30px; width:60%">
-            Published {{ page.date | date: "%b %-d, %Y" }}                
+</header>
+
+<article>
+    <div class="container">
+        <div class = "row" >
+            <div class="col-lg-8 col-lg-offset-1 col-md-8 col-md-offset-1 col-sm-12 col-xs-12 post-container">
+                <div class="post-content" itemprop="articleBody">
+                    <div style="font-family: Helvetica, arial, sans-serif; font-size: 14px; line-height: 1.8;"> {{ content }}  </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-lg-offset-0 visible-lg-block sidebar-container catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
         </div>
     </div>
+</article>
 
 
-    <div class="post-content" itemprop="articleBody">
-
-            {% if page.summary %}
-            <div class="summary" style="font-size: 14px;">{{page.summary}}</div>
-            {% endif %}
-            
-            {% unless page.toc == false %}
-            {% include toc.html %}
-            {% endunless %}
-
-            <div style="font-family: Helvetica, arial, sans-serif; font-size: 14px; line-height: 1.8;"> {{ content }}  </div>
-        </div>
-    </div>
-</div>
-
-{% include footer.html %}

@@ -3,7 +3,10 @@ layout: content
 title: php性能分析一：xhprof使用说明
 status: 1
 # complete: 10% 
-category: php
+author:   "yimuren"
+tags:
+    - php
+    - c
 ---
 
 ## 一. 背景 ##

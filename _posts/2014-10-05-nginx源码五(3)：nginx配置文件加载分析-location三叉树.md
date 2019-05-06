@@ -3,14 +3,16 @@ layout: content
 title: nginx源码五(3)：nginx配置文件分析-location前缀树
 status: 1
 complete: 10% 
-category: nginx
+author:     "yimuren"
+tags:
+    - nginx
 ---
 
 ## 一.前言
 
 我们在前面提到了nginx的指令分析，针对server {} 里面的 location {} 指令，平行的 location指令 和 嵌套的 location指令 之间都会通过 queue 的双向链表来进行串联， 双向链表的头节点分别是 location {} 的父 location指向的 ngx_http_core_moudle的配置文件区，如下图
 
-![ngx_loc_tree_conf](/images/nginx/ngx_loc_data.jpeg)
+![ngx_loc_tree_conf]({{site.baseurl}}/img/nginx/ngx_loc_data.jpeg)
 
 上面的图只是location {} 指令的分析的初始化阶段，下一步，会经历多个步骤，最终构建一个location的静态树，方便nginx在处理http请求的时候，在找到server后，快速的找到location的配置，总的来说，分成下面几个步骤：
 - 1.location配置的创建
@@ -93,7 +95,7 @@ http {
 
 server{} 指令内部的location {} 指令，是一对多的关系，同时location {}内部还支持嵌套，nginx在分析完每一条指令后，会将配置信息写到创建的配置管理中，我们在开始的图中，描述了这个配置的关系，在配置信息创建后，下面就可以处理这些配置，走到下面第三步，对指令配置做一个排序。 为了方便理解，我们按照上面的 location的配置示例，画了下面一张图， 在这里，简单起见，我们不考虑 location内部的嵌套关系
 
-![ngx_loc_tree_conf](/images/nginx/ngx_loc_init.jpeg)
+![ngx_loc_tree_conf]({{site.baseurl}}/img/nginx/ngx_loc_init.jpeg)
 
 
 ## 三.location指令的排序
@@ -137,14 +139,14 @@ ngx_http_cmp_locations(const ngx_queue_t *one, const ngx_queue_t *two)
 
 下面一张图是针对前面的示例做的排序：
 
-![ngx_loc_tree_conf](/images/nginx/ngx_loc_split1.jpeg)
+![ngx_loc_tree_conf]({{site.baseurl}}/img/nginx/ngx_loc_split1.jpeg)
 
 
 ## 四.location指令的切分
 
 排完序以后，location指令实际被做了几次切分，分别是 (精确匹配 + 包含类型匹配) + 正则匹配 + named类型匹配 + nonamed类型匹配，nginx下一步是切分，切分后，通过上下文配置的不同变量来管理。 这里不做详细描述，切分后可以参考一下下面的图：
 
-![ngx_loc_tree_conf](/images/nginx/ngx_loc_split2.jpeg)
+![ngx_loc_tree_conf]({{site.baseurl}}/img/nginx/ngx_loc_split2.jpeg)
 
 
 ## 五.location指令的精确匹配和包含匹配的合并
@@ -165,13 +167,13 @@ typedef struct {
 
 我们可以看到，`ngx_http_location_queue_t` 中可以支持精确和包含关系的 ngx_http_core_loc_conf_t 配置，所以，在这步，nginx做了一件是，就是合并，例如，示例中的 `location /` 和 `location =/` 合并到一个`ngx_http_location_queue_t` 中。
 
-![ngx_loc_tree_conf](/images/nginx/ngx_loc_exac.jpeg)
+![ngx_loc_tree_conf]({{site.baseurl}}/img/nginx/ngx_loc_exac.jpeg)
 
 ## 六.location指令生成包含关系的list
 
 做完上面的操作后，nginx针对包含关系，选择了开链的处理方式，如下图：
 
-![ngx_loc_tree_conf](/images/nginx/ngx_loc_list.jpeg)
+![ngx_loc_tree_conf]({{site.baseurl}}/img/nginx/ngx_loc_list.jpeg)
 
 ## 七.location的三叉树形成
 
@@ -199,7 +201,7 @@ struct ngx_http_location_tree_node_s {
 
 下图则是示例的形成结果，实际上还有一点，就是，为了节约空间，树在存储的时候，按照前缀方式做了存储设计
 
-![ngx_loc_tree_conf](/images/nginx/ngx_loc_tree.jpeg)
+![ngx_loc_tree_conf]({{site.baseurl}}/img/nginx/ngx_loc_tree.jpeg)
 
 
 ## 八.查找算法 ngx_http_core_find_static_location

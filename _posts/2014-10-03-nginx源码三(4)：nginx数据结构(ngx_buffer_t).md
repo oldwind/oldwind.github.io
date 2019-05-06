@@ -3,7 +3,9 @@ layout: content
 title: nginx源码三(4)：nginx数据结构(ngx_buffer_t)
 status: 3
 complete: 10% 
-category: nginx
+author:     "yimuren"
+tags:
+    - nginx
 ---
 
 ## 一.基础数据结构

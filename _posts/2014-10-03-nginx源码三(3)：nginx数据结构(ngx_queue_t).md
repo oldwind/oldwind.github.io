@@ -3,7 +3,9 @@ layout: content
 title: nginx源码三(3)：nginx数据结构(ngx_queue_t)
 status: 1
 complete: 10% 
-category: nginx
+author:     "yimuren"
+tags:
+    - nginx
 ---
 
 ## 一.前言
@@ -14,7 +16,7 @@ category: nginx
 - 双栈的话，多存在面试题中
 - 使用链表比较长见，我们看一下下面一张图
 
-![ngx_queue](/images/nginx/ngx_queue1.jpg)
+![ngx_queue]({{site.baseurl}}/img/nginx/ngx_queue1.jpg)
 
 可以用两个数据结构来实现先进先出，一个queue的头节点指向一个单向链表的头尾指针，另外一个单向链表。 通过头部增加节点，尾部删除节点的方法实现先进先出。 这种方法里面存在两个问题
 
@@ -23,7 +25,7 @@ category: nginx
 
 这里，在性能方面，nginx首先把节点和使用到queue的数据结构做了融合，通过计算结构体偏移量的方式，去获取队列里面的数据元素，其次nginx的queue采用了环形双向链表的结构，对于queue的操作会非常简单灵活。
 
-![ngx_queue](/images/nginx/ngx_queue2.jpg)
+![ngx_queue]({{site.baseurl}}/img/nginx/ngx_queue2.jpg)
 
 <br/>
 
@@ -42,7 +44,7 @@ struct ngx_queue_s {
 
 下面一张图是队列的示例图，展示单个节点到多节点队列的形成过程，环形列表构成的队列，作用是很明晰的，外部只需要定义一个 `ngx_queue_t * `，就可以操作这个队列
 
-![ngx_queue](/images/nginx/ngx_queue3.jpg)
+![ngx_queue]({{site.baseurl}}/img/nginx/ngx_queue3.jpg)
 
 
 ## 三. ngx_queue_t的使用
@@ -61,7 +63,7 @@ typedef struct {
 } ngx_http_location_queue_t;
 {% endhighlight %}
 
-![ngx_queue](/images/nginx/ngx_queue4.jpg)
+![ngx_queue]({{site.baseurl}}/img/nginx/ngx_queue4.jpg)
 
 `ngx_queue_t list;    ngx_queue_t queue;`， 作为`ngx_http_location_queue_t`的成员变量，首先说明如何获取其它成员信息
 

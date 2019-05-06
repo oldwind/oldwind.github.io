@@ -1,136 +1,86 @@
-repository: 
+# Site settings
+title: Yimuren Blog
+SEOTitle: 博客 | Yimuren Blog
+header-img: img/home.jpeg
+email: 534357478@qq.com
+description: ""
+keyword: ""
+url: ""              # your host, for absolute URL
+baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
 
-output: web
-# this property is useful for conditional filtering of content that is separate from the PDF.
 
-topnav_title: Stay hungry, Stay foolish
-# this appears on the top navigation bar next to the home button
 
-site_title:  Stay hungry, Stay foolish
-# this appears in the html browser tab for the site title (seen mostly by search engines, not users)
+# SNS settings 
+RSS: false
+weibo_username:     711012620
+# zhihu_username:     huxpro
+github_username:    oldwind 
+#twitter_username:  huxpro
+# facebook_username:  huxpro
 
-company_name: 
-# this appears in the footer
 
-github_editme_path: oldwind/oldwind.github.io/
-# if you're using Github, provide the basepath to the branch you've created for reviews, following the sample here. if not, leave this value blank.
 
-# gitlab_editme_path: tomjoht/documentation-theme-jekyll/blob/gh-pages/
-# if you're using GitLab, provide the basepath to the branch you've created for reviews, following the sample here. if not, leave this value blank.
+# Build settings
+# from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
+highlighter: rouge
+permalink: pretty
+paginate: 10
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
+anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
 
-# disqus_shortname: idratherbewriting
-# if you're using disqus for comments, add the shortname here. if not, leave this value blank.
 
-google_analytics: UA-66296557-1
-# if you have google-analytics ID, put it in. if not, edit this value to blank.
+# Gems
+# from PR#40, to support local preview for Jekyll 3.0
+gems: [jekyll-paginate]
 
-host: 127.0.0.1
-# the preview server used. Leave as is.
 
-port: 4000
-# the port where the preview is rendered. You can leave this as is unless you have other Jekyll builds using this same port that might cause conflicts. in that case, use another port such as 4006.
 
-exclude:
-  - .idea/
-  - .gitignore
-# these are the files and directories that jekyll will exclude from the build
-
-feedback_subject_line: 问题
-
-feedback_email: 534357478@qq.com
-# used as a contact email for the Feedback link in the top navigation bar
-
-# feedback_disable: true
-# if you uncomment the previous line, the Feedback link gets removed
-
-# feedback_text: "Need help?"
-# if you uncomment the previous line, it changes the Feedback text
-
-# feedback_link: "http://helpy.io/"
-# if you uncomment the previous line, it changes where the feedback link points to
-
-highlighter: C
-# library used for syntax highlighting
-
-# markdown: kramdown
-# kramdown:
-#  input: GFM
-#  auto_ids: true
-#  hard_wrap: false
-#  syntax_highlighter: rouge
-
-markdown:       kramdown
-highlighter:    rouge
+# Markdown settings
+# replace redcarpet to kramdown,
+# although redcarpet can auto highlight code, the lack of header-id make the catalog impossible, so I switch to kramdown
+# document: http://jekyllrb.com/docs/configuration/#kramdown
+markdown: kramdown
 kramdown:
-  input:                     GFM
-  auto_ids:                  true
-  footnote_nr:               1
-  entity_output:             as_char
-  toc_levels:                1..6
-  smart_quotes:              lsquo,rsquo,ldquo,rdquo
-  enable_coderay:            false
-  hard_wrap:                 false
-  syntax_highlighter:        rouge
-  transliterated_header_ids: true
-  footnote_backlink:         "&#8617;&#xfe0e;"
-
-# filter used to process markdown. note that kramdown differs from github-flavored markdown in some subtle ways
-
-collections:
-  tooltips:
-    output: false
-# collections are declared here. this renders the content in _tooltips and processes it, but doesn't output it as actual files in the output unless you change output to true
-
-defaults:
-  -
-    scope:
-      path: ""
-      type: "pages"
-    values:
-      layout: "page"
-      comments: true
-      search: true
-      sidebar: home_sidebar
-      topnav: topnav
-  -
-    scope:
-      path: ""
-      type: "tooltips"
-    values:
-      layout: "page"
-      comments: true
-      search: true
-      tooltip: true
-
-  -
-    scope:
-      path: ""
-      type: "posts"
-    values:
-      layout: "post"
-      comments: true
-      search: true
-      sidebar: home_sidebar
-      topnav: topnav
-
-# these are defaults used for the frontmatter for these file types
-
-sidebars:
-- home_sidebar
-- mydoc_sidebar
+  input: GFM                            # use Github Flavored Markdown !important
 
 
-description: "ddd."
-# the description is used in the feed.xml file
 
-# needed for sitemap.xml file only
-# url: http://idratherbewriting.com
-# baseurl: /documentation-theme-jekyll
+# Disqus settings
+#disqus_username: _your_disqus_short_name_
 
-paginate: 20
-per_page: 20
-paginate_path: "/page/:num/"
+# Duoshuo settings
+duoshuo_username: huxblog
+# Share component is depend on Comment so we can NOT use share only.
+duoshuo_share: true                     # set to false if you want to use Comment without Sharing
 
-plugins:
-  - jekyll-paginate
 
+
+
+# Analytics settings
+# Baidu Analytics
+ba_track_id: 4cc1f2d8f3067386cc5cdb626a202900
+# Google Analytics
+ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
+ga_domain:  
+
+
+
+# Sidebar settings
+sidebar: true                           # whether or not using Sidebar.
+sidebar-about-description: 我们要收将来的善果，必须努力种现在的新因。一粒一粒的种，必有满仓满屋的收成，这是我们今日应该有的信心。我们要深信；今日的失败，都由于过去的不努力。我们要深信；今日的努力，必定有将来的大收成。 佛典里有一句话："福不唐捐"。唐捐就是白白的丢了。我们也应该说："功不唐捐！"没有一点努力是会白白的丢了的。在我们看不见想不到的时候，在我们看不见想不到的方向，你瞧！你下的种子早已生根发叶开花结果了！
+sidebar-avatar: /img/001.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+
+
+
+# Featured Tags
+featured-tags: true                     # whether or not using Feature-Tags
+featured-condition-size: 0             # A tag will be featured if the size of it is more than this condition value
+
+
+# Friends
+friends: [
+    {
+        title: "It helps SEO",
+        href: "#"
+    }
+]

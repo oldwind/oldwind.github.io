@@ -3,7 +3,9 @@ layout: content
 title: http协议中Transfer-Encoding的chunked
 status: 3
 complete: 10% 
-category: php
+author:     "yimuren"
+tags:
+    - http
 ---
 
 ## 一. 前言

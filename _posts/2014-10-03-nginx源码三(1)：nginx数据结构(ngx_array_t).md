@@ -3,7 +3,9 @@ layout: content
 title: nginx源码三(1)：nginx数据结构(ngx_array_t)
 status: 1
 complete: 10% 
-category: nginx
+author:     "yimuren"
+tags:
+    - nginx
 ---
 
 ## 一. 前言
@@ -19,7 +21,7 @@ category: nginx
 
 nginx对于堆中实现数组和前面讲的内存池有共同的一个特点，就是对于申请到的一块连续内存，采用`头部+数据区`的的方式，我们先看下面的一张简图：
 
-![nginx](/images/nginx/ngx_array1.jpg)
+![nginx]({{site.baseurl}}/img/nginx/ngx_array1.jpg)
 
 **需要说明一下，就是`头部`和 `数据区`不一定在连续内存上**，这张图是简画成了连续内存， 看到这张图，我们应该可以考虑到这个头部应该包含的数组元素，下面看一下详细的数据结构：
 

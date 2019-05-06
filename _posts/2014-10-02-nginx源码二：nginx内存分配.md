@@ -2,7 +2,9 @@
 layout: content
 title: nginx源码二：nginx内存分配
 status: 1
-category: nginx
+author:     "yimuren"
+tags:
+    - nginx
 ---
 
 ## 一. 前言
@@ -42,7 +44,7 @@ typedef struct {
 
 我们用一张图来表示一下这张结构
 
-![nginx](/images/nginx/ngx_pool1.jpg)
+![nginx]({{site.baseurl}}/img/nginx/ngx_pool1.jpg)
 
 `内存池`实际上并没有`池`，所谓的池是由多个串联的`内存块`构成，如上图，我们把这个称作`内存块`，应用程序每次向操作系统申请这么大的一块`内存块`, 这个内存块又分成两部分，`内存块的头部区`和`内存块的数据区`， 头部区管理内存的`分配`和不同`内存块`之间的串联
 
@@ -142,7 +144,7 @@ ngx_palloc_block(ngx_pool_t *pool, size_t size)
 ### 2.3 内存池的总体预览
 综合上面，通过下图可以看到一个内存池的总体结构
 
-![nginx](/images/nginx/ngx_pool2.jpg)
+![nginx]({{site.baseurl}}/img/nginx/ngx_pool2.jpg)
 
 
 ## 三. 总结

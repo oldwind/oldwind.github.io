@@ -2,7 +2,9 @@
 layout: content
 title: tcpdump分析tcp和ip包信息
 status: 1 
-category: php
+author:     "yimuren"
+tags:
+    - linux
 ---
 
 ## 前言
@@ -18,10 +20,10 @@ category: php
 ### tcpdump所抓包与TCP/IP协议的对应分析
 在使用tcpdump抓包时， 使用-X参数，可以显示IP包的包头信息;  使用-xx参数，可以显示链路层的包头信息，这里我们只看IP包，IP包包含IP包首部+TCP包首部 + TCP包数据部分。
 - a、IP包的规则
-![ip](/images/php/ip.png)
+![ip]({{site.baseurl}}/img/php/ip.png)
    
 - b、tcp包规则　　
-![tcp](/images/php/tcp.png)
+![tcp]({{site.baseurl}}/img/php/tcp.png)
 
 在了解IP包和tcp包包头规则后，我们使用tcpdump抓包了解一下包头：
 

@@ -3,7 +3,9 @@ layout: content
 title: nginx源码五(4)：nginx配置文件加载-request阶段处理机制
 status: 3
 complete: 10% 
-category: nginx
+author:     "yimuren"
+tags:
+    - nginx
 ---
 
 ## 一.前言
@@ -45,7 +47,7 @@ category: nginx
 
 我在下面列了一个图，表述在第二阶段的所做的阶段处理机制，这11个阶段大致要做的事情，其中有四个阶段是不能挂载扩展的，图中已经标示出来
 
-![ngx_http_phase1](/images/nginx/ngx_http_phase1.png)
+![ngx_http_phase1]({{site.baseurl}}/img/nginx/ngx_http_phase1.png)
 
 
 

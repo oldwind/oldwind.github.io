@@ -3,7 +3,9 @@ layout: content
 title: nginx源码五(2)：nginx配置文件分析-指令的理解
 status: 1
 complete: 10% 
-category: nginx
+author:     "yimuren"
+tags:
+    - nginx
 ---
 
 ## 一.前言
@@ -11,7 +13,7 @@ category: nginx
 前面对`location {}`的配置分析起了一个头，实际上，location的指令非常复杂，关注一下下面几个问题：
 - 1、nginx通过指令和指令的handle方式处理 `http`, `server`, `location`的层级关系，那么下面那几种层级关系的配置哪些是可以支持的呢？
 
-![ngx_location_conf](/images/nginx/ngx_cmd1.jpg)
+![ngx_location_conf]({{site.baseurl}}/img/nginx/ngx_cmd1.jpg)
 
 - 2、nginx在指令中如何区分`http {}` 和 `error_page` 这两种不同的指令类型？
 
@@ -40,7 +42,7 @@ struct ngx_command_s {
 
 下面是一张图，标识nginx的command如何通过nginx_uint_t类型来标识不同的类型，一个nginx_uint_t类型占四个字节，nginx采用各个字节来存储不同的类型。同时可以通过 或的方式来标识各个类型的集合
 
-![ngx_conf](/images/nginx/ngx_cmd2.jpg)
+![ngx_conf]({{site.baseurl}}/img/nginx/ngx_cmd2.jpg)
 
 
 **下面是对各个类型的一个注释**
@@ -71,7 +73,7 @@ struct ngx_command_s {
 - http {} 的分析
 - event {} 的分析
 
-![ngx_conf](/images/nginx/ngx_cmd3.jpg)
+![ngx_conf]({{site.baseurl}}/img/nginx/ngx_cmd3.jpg)
 
 `NGX_DIRECT_CONF`、`NGX_MAIN_CONF`、`NGX_ANY_CONF`影响的是用户配置信息的设定，这里的思考大概是这样的：
 - 1、对于`NGX_DIRECT_CONF`存在配置中全局作用域的command，例如 `daemon` `master_process` 这类型的指令，分析到这类型的指令，拿着上下文的节点，可以直接找到指令所需要配置的位置去设定
@@ -79,7 +81,7 @@ struct ngx_command_s {
 - 3、其它的配置，基本思路是针对不同上下文节点，通过偏移拿到配置的头节点
 可以参考下图
 
-![ngx_conf](/images/nginx/ngx_cmd4.jpg)
+![ngx_conf]({{site.baseurl}}/img/nginx/ngx_cmd4.jpg)
 
 具体可以参考下面的代码实现
 
