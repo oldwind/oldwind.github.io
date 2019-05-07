@@ -20,13 +20,13 @@ category: php
 
 ## 二. 分析之路1-脚本编码分析
 
-{% highlight bash %}
+```bash
 00000000: 3c3f 7068 700a 2468 65c2 a03d 2022 6865  <?php.$he..= "he
 00000010: 6c6c 6f22 3b20 0a76 6172 5f64 756d 7028  llo"; .var_dump(
 00000020: 2468 6529 3b0a 0a24 6865 203d 2022 6865  $he);..$he = "he
 00000030: 6c6c 6f22 3b0a 7661 725f 6475 6d70 2824  llo";.var_dump($
 00000040: 6865 293b 0a0a 0a                        he);...
-{% endhighlight %}
+```
 
 我们仔细看一下编码
 - 第一个`he`变量后是两个字节，对应的分别是 `c2 a0`，这个在UTF-8上识别成空格， 而C2 =  (12 * 16 +2) = 198; a0 = 160这个会通过php的变量检查
@@ -48,7 +48,7 @@ category: php
 
 接着前面的php内核处理脚本流程，我们能感觉，无非两个阶段，"编译"期间或者"执行"期间； 这里叉开一下话题，我尝试用Go写了一个测试，赋值给一个非法变量名的变量，Go的编译期是过不去，php的编译和执行是在一起的，但是我们可以猜想变量的分析，是否合法是在编译阶段，用gdb调试可以明确这一点
 
-{% highlight bash %}
+```bash
 Thread 2 hit Breakpoint 2, zend_execute_scripts (type=8, retval=0x0, file_count=3) at Zend/zend.c:1321
 1321			EG(active_op_array) = zend_compile_file(file_handle, type TSRMLS_CC);
 (gdb) bt
@@ -60,9 +60,9 @@ Thread 2 hit Breakpoint 2, zend_execute_scripts (type=8, retval=0x0, file_count=
 
 Parse error: syntax error, unexpected '=' in /test.php on line 2
 [Inferior 1 (process 74169) exited with code 0377]
-{% endhighlight %}
+```
   
-{% highlight bash %}
+```bash
 #0  zendparse () at Zend/zend_language_parser.c:6869
 #1  0x00000001006080d2 in compile_file (file_handle=0x7ffeefbff140, type=8) at Zend/zend_language_scanner.l:585
 #2  0x0000000100343c21 in phar_compile_file (file_handle=0x7ffeefbff140, type=8) at ext/phar/phar.c:3411
@@ -70,6 +70,6 @@ Parse error: syntax error, unexpected '=' in /test.php on line 2
 #4  0x00000001005c358b in php_execute_script (primary_file=0x7ffeefbff140) at main/main.c:2502
 #5  0x000000010071fa17 in do_cli (argc=2, argv=0x7ffeefbff858) at sapi/cli/php_cli.c:989
 #6  0x000000010071e8de in main (argc=2, argv=0x7ffeefbff858) at sapi/cli/php_cli.c:1365
-{% endhighlight %}
+```
 
 这个时候，我有点怀念php的调用栈了

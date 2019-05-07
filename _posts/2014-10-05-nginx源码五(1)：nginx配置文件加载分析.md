@@ -18,7 +18,7 @@ tags:
 
 不同的格式可以有不同的lib库处理，nginx对外部库的依赖非常的少，对配置文件的分析也是自己做的，nginx配置文件的格式是一个综合体，看起来类似键值对，但是，也支持一键 对 多个参数的方式。 同时nginx的配置存在多个层级关系，例如command里面的
 
-{% highlight bash%}
+```bash
     event{
     }
     http {
@@ -28,7 +28,7 @@ tags:
             }
         }
     }
-{% endhighlight%}
+```
 
 配置文件中的层级关系nginx采用了command + {} 的方式，nginx的配置文件类似一门简单的语言，nginx作为内核，分析了配置文件，将配置参数记录下来，提供程序运行时使用。
 
@@ -43,7 +43,7 @@ tags:
 ### 2.1 conf的create
 所谓的create；就是对所有模块设定的conf的数据结构的成员变量赋默认值，例如下面的`ngx_core_module_create_conf`
    
-{% highlight c%}
+```c
 static ngx_core_module_t  ngx_core_module_ctx = {
     ngx_string("core"),
     ngx_core_module_create_conf,
@@ -68,13 +68,13 @@ static void *ngx_core_module_create_conf(ngx_cycle_t *cycle) {
     ...
 
 }
-{% endhighlight %}
+```
 
 ### 2.2 配置文件解析
 
 将分析结果写到对应配置的conf数据结构里面
 
-{% highlight c%}
+```c
     conf.module_type = NGX_CORE_MODULE;
     conf.cmd_type = NGX_MAIN_CONF;
 
@@ -93,12 +93,12 @@ static void *ngx_core_module_create_conf(ngx_cycle_t *cycle) {
         ngx_destroy_cycle_pools(&conf);
         return NULL;
     }
-{% endhighlight %}
+```
 
 ### 2.3 配置信息的默认值
 如果有些配置信息没有配置，则赋予默认值
 
-{% highlight c%}
+```c
 
 static char *
 ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
@@ -109,13 +109,13 @@ ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
     ngx_conf_init_value(ccf->master, 1);
     ...
 }
-{% endhighlight %}
+```
 
 ## 三.nginx配置存储结构
 
 `创建配置项；分析配置文件；初始化未定义的默认值`，这三件事情是配置处理的主思路，但是针对配置分析的流程，说的还是不细，我们下面详细说配置分析的流程，并且说一下配置的最终存储结构，我们拿到一个简单的配置文件，说一下nginx的处理思路
 
-{% highlight bash%}
+```bash
 worker_processes  1;
 events {
     worker_connections  1024;
@@ -134,7 +134,7 @@ http {
     }
 }
 keepalive_timeout  65;
-{% endhighlight %}
+```
 
 主要步骤：
 - `1. 首先Nginx给每个模块都做了编号，编号信息存在插件的index变量里面`
@@ -150,7 +150,7 @@ keepalive_timeout  65;
 - `7. 配置文件继续分析，分析到event指令 和 "{"`
 - `8. 调起event指令的处理handle "ngx_events_block"`
 
-{% highlight c %}
+```c
 static ngx_command_t  ngx_events_commands[] = {
 
     { ngx_string("events"),
@@ -162,7 +162,7 @@ static ngx_command_t  ngx_events_commands[] = {
 
       ngx_null_command
 };
-{% endhighlight %}
+```
 
 - `9. ngx_events_block 开启event模块的处理流程，首先创建连续的内存，存放所有NGX_EVENT_MODULE类型模块上下文指针，这段连续内存的访问方式见上图标识`
 - `10. 启动分析block内的指令`
@@ -178,7 +178,7 @@ static ngx_command_t  ngx_events_commands[] = {
 ![ngx_http_conf]({{site.baseurl}}/img/nginx/ngx_conf2.jpg)
 
 - 配置的选择顺序按照 location 到 server 到 http先后关系，例如 root这个指令，它可以在 http， server， location三个级别做配置；那么对于location匹配到的请求，选择配置信息的顺序是，如果 location {} 里面配置了，选用location{}，否则就是 server {}, 在次是http {}, 如果都么有配置，那么必定有一个默认值
-{% highlight c %}
+```c
     { ngx_string("root"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
                         |NGX_CONF_TAKE1,
@@ -186,7 +186,7 @@ static ngx_command_t  ngx_events_commands[] = {
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
-{% endhighlight %}
+```
 
 - 理论上，nginx可以配置无限个server，每个server又可以配置无限多个location。那么我们考虑一个请求过来，先要找到对应的server，在找到对应的location，根据location的配置确定处理逻辑；配置信息的存储实际第一步是按照下图的关系做了原始存储，那么存储的流程是什么样的呢？  
 
@@ -198,7 +198,7 @@ static ngx_command_t  ngx_events_commands[] = {
 
 
 - `12. nginx分析到http指令，执行http的指令 ngx_http_block`
-{% highlight c %}
+```c
 static ngx_command_t  ngx_http_commands[] = {
 
     { ngx_string("http"),
@@ -210,7 +210,7 @@ static ngx_command_t  ngx_http_commands[] = {
 
       ngx_null_command
 };
-{% endhighlight %}
+```
 
 - `13. ngx_http_block在处理的时候，考虑到内部还有server block 和 location block的特点，做了下面一个设计`
     - 设计一个上下文的节点数据结构，包含三个成员指针，main_conf、srv_conf、loc_conf
@@ -233,7 +233,7 @@ static ngx_command_t  ngx_http_commands[] = {
 
 **从下面的代码可以看出来，这两个规范，代码中实际没有严格要求，但是如果写nginx插件的时候，没有按照这个要求，会导致location{}内配置命令的相互干扰**
 
-{% highlight c %}
+```c
 { ngx_string("connection_pool_size"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1, //支持 http{}，server{}内设定， 支持一个参数
       ngx_conf_set_size_slot,  // set方法
@@ -248,7 +248,7 @@ static ngx_command_t  ngx_http_commands[] = {
       offsetof(ngx_http_core_loc_conf_t, types_hash_max_size), 
       NULL },
 
-{% endhighlight %}
+```
 
 下面，我们在画一张图来标识用户指令配置的存储位置
 

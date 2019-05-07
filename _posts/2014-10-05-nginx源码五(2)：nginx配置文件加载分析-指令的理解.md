@@ -22,7 +22,7 @@ tags:
 ## 二.nginx指令的嵌套问题
 
 我们先看一下nginx的`command`数据结构，我在后面做了注释
-{% highlight c %}
+```c
 struct ngx_command_s {
     ngx_str_t             name; // 指令名称
     ngx_uint_t            type;  // 指令类型
@@ -31,7 +31,7 @@ struct ngx_command_s {
     ngx_uint_t            offset;  // 配置内存储改元素信息的偏移量
     void                 *post;    // 通常是NULL
 };
-{% endhighlight %}
+```
 
 在这里面，`ngx_command_s` 的 `type` 成员变量是最复杂的，nginx在指令分析中，会根据type的类型做相应的处理，`type`有各种类型，主要在这几个方面
 - 1、参数方面，设定一个指令接受参数的个数
@@ -46,7 +46,7 @@ struct ngx_command_s {
 
 
 **下面是对各个类型的一个注释**
-{% highlight c %}
+```c
 #define NGX_CONF_NOARGS      0x00000001    // 没有参数
 #define NGX_CONF_TAKE1       0x00000002    // 1个参数
 #define NGX_CONF_TAKE2       0x00000004    // 2个参数
@@ -66,7 +66,7 @@ struct ngx_command_s {
 #define NGX_DIRECT_CONF      0x00010000    // 
 #define NGX_MAIN_CONF        0x01000000    // 
 #define NGX_ANY_CONF         0x0F000000    // 
-{% endhighlight %}
+```
 
 `NGX_DIRECT_CONF`、`NGX_MAIN_CONF`、`NGX_ANY_CONF`的含义不是非常好描述，我们拿到几个代表性的配置块来看一下，参考下图，分别是
 - core模块
@@ -85,7 +85,7 @@ struct ngx_command_s {
 
 具体可以参考下面的代码实现
 
-{% highlight c %}
+```c
 static ngx_int_t
 ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 {
@@ -105,7 +105,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
             }
     ...
 }
-{% endhighlight %}
+```
 
 
 ## 三. 提出问题的回答
@@ -114,33 +114,33 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 
 但是在实现上，http{} 作用域内哪些指令会被执行，nginx通过 上面说的 cmd 的 cmd_type 来管理， 我们来看 server指令和 location指令，可以发现location指令在做conf的parse时候，会支持 NGX_HTTP_LOC_CONF的模块，这是location能嵌套的原因
 
-{% highlight c %}
+```c
     cf->module_type = NGX_HTTP_MODULE;
     cf->cmd_type = NGX_HTTP_MAIN_CONF;
     rv = ngx_conf_parse(cf, NULL);
-{% endhighlight %}
+```
 
 
-{% highlight c %}
+```c
     { ngx_string("server"),
       NGX_HTTP_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
       ngx_http_core_server,
       0,
       0,
       NULL },
-{% endhighlight %}
+```
 
-{% highlight c %}
+```c
     { ngx_string("location"),
       NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_BLOCK|NGX_CONF_TAKE12,
       ngx_http_core_location,
       NGX_HTTP_SRV_CONF_OFFSET,
       0,
       NULL },
-{% endhighlight %}
+```
 
 
-{% highlight c %}
+```c
 static ngx_int_t
 ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 {
@@ -166,7 +166,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
     }
     ...
 }
-{% endhighlight %}
+```
 
 **nginx 规定了 location 的嵌套条件，可参考下面的代码**
 - `如果父location 指令是 是精确匹配，locaton不能嵌套`
@@ -174,7 +174,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 - `如果是 @名称这种，不能发生嵌套匹配`
 - `嵌套匹配时候，和父location的参数，保持包含关系，例如 父location 是 /a， 子location 必须是 /a* 这种`
 
-{% highlight c %}
+```c
         if (pclcf->exact_match) {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                "location \"%V\" cannot be inside "
@@ -199,4 +199,4 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
             return NGX_CONF_ERROR;
         }
 
-{% endhighlight %}
+```

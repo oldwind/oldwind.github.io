@@ -53,7 +53,7 @@ tags:
 
 
 
-{% highlight c %}
+```c
 void
 ngx_http_core_run_phases(ngx_http_request_t *r)
 {
@@ -74,13 +74,13 @@ ngx_http_core_run_phases(ngx_http_request_t *r)
         }
     }
 }
-{% endhighlight %}
+```
 
 ## 二.nginx指令的嵌套问题
 
 nginx的指令嵌套重点关注两部分代码，一是
 
-{% highlight c %}
+```c
 struct ngx_command_s {
     ngx_str_t             name;
     ngx_uint_t            type;
@@ -89,7 +89,7 @@ struct ngx_command_s {
     ngx_uint_t            offset;
     void                 *post;
 };
-{% endhighlight %}
+```
 
 
 

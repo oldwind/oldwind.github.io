@@ -26,7 +26,7 @@ tags:
 
 为了便于理解，我在这里设计了一个location的示例，我们看一下三叉树的形成过程
  
-{% highlight c %}
+```c
 http {
     server {
         add_header  Content-Type 'text/html; charset=utf-8';
@@ -88,7 +88,7 @@ http {
         }
     }
 }
-{% endhighlight %}
+```
 
 
 ## 二.location配置的创建
@@ -106,7 +106,7 @@ nginx通过queue去串联配置的location，下一步是对location进行排序
 
 我们看一下针对location指令的比较逻辑
 
-{% highlight c %}
+```c
 static ngx_int_t
 ngx_http_cmp_locations(const ngx_queue_t *one, const ngx_queue_t *two)
 {
@@ -127,7 +127,7 @@ ngx_http_cmp_locations(const ngx_queue_t *one, const ngx_queue_t *two)
 
     return rc;
 }
-{% endhighlight %}
+```
 
 在这里，我们简单说一下这个比较算法实现的目标：
 1. noname类型的location放在最后
@@ -153,7 +153,7 @@ ngx_http_cmp_locations(const ngx_queue_t *one, const ngx_queue_t *two)
 
 正则匹配和named匹配指令已经被切走了，那么剩余下来是 精确 + 包含类型匹配， 我们可以看一下下面的数据结构，做了注释
 
-{% highlight c %}
+```c
 typedef struct {
     ngx_queue_t                      queue;       // 平级location之间的双向链表
     ngx_http_core_loc_conf_t        *exact;       // 精确匹配 指向的 ngx_http_core_loc_conf_t 配置
@@ -163,7 +163,7 @@ typedef struct {
     ngx_uint_t                       line;  
     ngx_queue_t                      list;        // 包含关系的开链指针
 } ngx_http_location_queue_t;
-{% endhighlight %}
+```
 
 我们可以看到，`ngx_http_location_queue_t` 中可以支持精确和包含关系的 ngx_http_core_loc_conf_t 配置，所以，在这步，nginx做了一件是，就是合并，例如，示例中的 `location /` 和 `location =/` 合并到一个`ngx_http_location_queue_t` 中。
 
@@ -179,7 +179,7 @@ typedef struct {
 
 终于到了最后一步，构造nginx 的location 三叉树。我们先看一下树节点的数据结构
 
-{% highlight c %}
+```c
 struct ngx_http_location_tree_node_s {
     ngx_http_location_tree_node_t   *left;  // assicc 值小
     ngx_http_location_tree_node_t   *right; // assicc 值大
@@ -192,7 +192,7 @@ struct ngx_http_location_tree_node_s {
     u_char                           len;
     u_char                           name[1];
 };
-{% endhighlight %}
+```
 
 对于前面生成的list，nginx创建树，按照下面的流程递归处理：
 1. 获取queue中的中间位置节点(q)作为根节点。切成三部分，第一部分是q的左边作为左子树，第二部分是q，第三部分是q的右边称为右子树，q的包含关系作为tree
@@ -226,7 +226,7 @@ struct ngx_http_location_tree_node_s {
             - 递归处理正则匹配中嵌套的匹配结果
         - 未匹配到，返回错误
     
-{% highlight c %}
+```c
 /*
  * NGX_OK       - exact or regex match
  * NGX_DONE     - auto redirect
@@ -303,10 +303,10 @@ ngx_http_core_find_location(ngx_http_request_t *r)
 
     return rc;
 }
-{% endhighlight %}
+```
 
 
-{% highlight c %}
+```c
 static ngx_int_t
 ngx_http_core_find_static_location(ngx_http_request_t *r,
     ngx_http_location_tree_node_t *node)
@@ -384,7 +384,7 @@ ngx_http_core_find_static_location(ngx_http_request_t *r,
         node = node->left;
     }
 }
-{% endhighlight %}
+```
 
 
 单从代码看，理解还是比较困难，举个下面的例子，我们看看下面几个问题
@@ -394,7 +394,7 @@ ngx_http_core_find_static_location(ngx_http_request_t *r,
 2. `如果/ca配置去掉， /cab2ms 会匹配到哪个location` 
     - 返回 9
 
-{% highlight c %}
+```c
 
 http {
     server {
@@ -426,7 +426,7 @@ http {
         }
     }
 } 
-{% endhighlight %}
+```
 
 
 总体匹配还是 精确 > 正则 > 包含原则

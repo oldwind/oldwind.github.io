@@ -37,7 +37,8 @@ tags:
 
 nginx的代码结构比较清晰， 核心代码在src文件下
 
-{% highlight bash%}├── auto   ## nginx编译工具集
+```bash
+├── auto   ## nginx编译工具集
 │   ├── cc
 │   ├── lib
 │   ├── os
@@ -60,7 +61,7 @@ nginx的代码结构比较清晰， 核心代码在src文件下
     ├── misc
     └── os    ## 跨平台封装模块
         └── unix           ## unix的系统API封装      
-{% endhighlight %} 
+``` 
 
 
 ## 三. nginx启动流程
@@ -76,16 +77,17 @@ nginx的代码结构比较清晰， 核心代码在src文件下
 
 在configure中指定需要的插件
 
-{% highlight bash%} 
+```bash 
 ./configure --prefix=/Users/baidu/dev/nginx --add-module=/{$USER_PATH}/github/nginx-stability-module/
 - --prifix 安转目录
 - --add-module 加入第三方模块地址
 - --with-http_stub_status_module 加入非默认的第三方库地址
-{% endhighlight %} 
+``` 
 
 configue根据参数，找到"插件"， 在objs目录下会生成一个nginx的"插件"数组的c文件 `ngx_module.c`， 
 
-{% highlight c%}...
+```c
+...
 extern ngx_module_t  ngx_http_copy_filter_module;
 extern ngx_module_t  ngx_http_range_body_filter_module;
 extern ngx_module_t  ngx_http_not_modified_filter_module;
@@ -95,26 +97,26 @@ ngx_module_t *ngx_modules[] = {
     &ngx_errlog_module,
     &ngx_conf_module,
     ...
-{% endhighlight %} 
+``` 
 
 #### 3.1.2. "插件列表"的使用
 
 在看源码的时候，没有经过编译，不会有`ngx_module.c`文件， 所以可以看到，只是在 ngx_conf_file.h声明了 `ngx_modules`，具体的实现是由上面的流程实现。 
 
-{% highlight c%}extern ngx_module_t  *ngx_modules[];
-{% endhighlight %} 
+```cextern ngx_module_t  *ngx_modules[];
+``` 
 
 nginx通常会for 循环 `ngx_modules[]` 这个数组，而后给module加上编号，后续根据类型来依次调起
 
-{% highlight bash%}for (i = 0; ngx_modules[i]; i++) {
+```bashfor (i = 0; ngx_modules[i]; i++) {
     ngx_modules[i]->index = ngx_max_module++;
 }
-{% endhighlight %} 
+``` 
 
 ### 3.2 进入main函数
 
 了解插件的加载后，我们从main方法(`src/core/nginx.c`)进去分析，提供一系列方法
-{% highlight bash%}ngx_debug_init
+```bashngx_debug_init
 ngx_strerror_init
 ngx_get_options
 ngx_time_init
@@ -134,7 +136,7 @@ ngx_log_redirect_stderr
 
 ngx_single_process_cycle
 ngx_master_process_cycle
-{% endhighlight %} 
+``` 
 
 总体我们分成几类来看
 - 一类是基础环境类的初始化，例如将`strerror`，`time`，`regex`，`ssl`，`log`, `os`等
@@ -147,9 +149,9 @@ ngx_master_process_cycle
 ### 3.3 主流程核心数据结构分析
 
 main函数里面，非常核心的一块地方是初始化 `cycle`
-{% highlight bash%}
+```bash
 cycle = ngx_init_cycle(&init_cycle);
-{% endhighlight %} 
+``` 
 
 我们先看一下`cycle`的结构类型而后看看`cycle`中会存什么数据， 从下面的数据结构，我们其实可以看出，主要是配置、连接、监听端口等等信息；关于`cycle`数据结构的功能边界，分成两个方面
 一方面体现`共享特性`
@@ -157,7 +159,7 @@ cycle = ngx_init_cycle(&init_cycle);
 
 - 监听端口，连接数信息，指定的conf配置路径等等，这些也是不区分进程的，父子进程共享的信息
 
-{% highlight bash%}
+```bash
 struct ngx_cycle_s {
     void                  ****conf_ctx;           ### 存各个模块的配置信息
     ngx_pool_t               *pool;               ### 内存池
@@ -194,13 +196,13 @@ struct ngx_cycle_s {
     ngx_str_t                 lock_file;
     ngx_str_t                 hostname;
 };
-{% endhighlight %} 
+``` 
 
 
 ## 四. nginx的"插件化"
 还是先上代码，解释一下什么是nginx的"插件化"，插件化是这里的描述，nginx并不是用`plugin`来形容插件，用的是`module`，我觉得插件和模块或者说是组件拥有相同的意思，先看一下module的数据结构，在来分析一下，一个模块或者说一个插件需要的核心属性
 
-{% highlight bash%}
+```bash
 struct ngx_module_s {
     ngx_uint_t            ctx_index;
     ngx_uint_t            index;
@@ -236,7 +238,7 @@ struct ngx_module_s {
     uintptr_t             spare_hook6;
     uintptr_t             spare_hook7;
 };
-{% endhighlight %} 
+``` 
 
 从代码中，我们能看出:
 
@@ -254,7 +256,7 @@ struct ngx_module_s {
 - 扩展的`hook`
 
 
-{% highlight bash%}
+```bash
 struct ngx_command_s {
     ngx_str_t             name;
     ngx_uint_t            type;
@@ -263,7 +265,7 @@ struct ngx_command_s {
     ngx_uint_t            offset;
     void                 *post;
 };
-{% endhighlight %} 
+``` 
 
 nginx插件化执行的流程大致是这样的：
 1. 首先处理配置问题，这个会在下一节详细介绍nginx配置文件的分析， 配置分析处理，大体有三个步骤

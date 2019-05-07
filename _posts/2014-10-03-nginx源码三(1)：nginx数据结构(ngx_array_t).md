@@ -25,7 +25,7 @@ nginx对于堆中实现数组和前面讲的内存池有共同的一个特点，
 
 **需要说明一下，就是`头部`和 `数据区`不一定在连续内存上**，这张图是简画成了连续内存， 看到这张图，我们应该可以考虑到这个头部应该包含的数组元素，下面看一下详细的数据结构：
 
-{% highlight c %}
+```c
 typedef struct {
     void        *elts;
     ngx_uint_t   nelts;
@@ -33,7 +33,7 @@ typedef struct {
     ngx_uint_t   nalloc;
     ngx_pool_t  *pool;
 } ngx_array_t;
-{% endhighlight %}
+```
 
 元素的基本含义是这样的：
 - `*elts` 指向申请数组内存的起始位置

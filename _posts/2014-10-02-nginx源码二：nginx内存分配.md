@@ -22,7 +22,7 @@ Linux下，操作系统提供应用程序了 `malloc` `free`来分配内存，�
 
 ### 2.1 nginx内存池数据结构
 
-{% highlight c %}
+```c
 struct ngx_pool_s {
     ngx_pool_data_t       d;
     size_t                max;
@@ -40,7 +40,7 @@ typedef struct {
     ngx_uint_t            failed;
 } ngx_pool_data_t;
 
-{% endhighlight %}
+```
 
 我们用一张图来表示一下这张结构
 
@@ -66,7 +66,7 @@ typedef struct {
 - 第三部分是**内存的回收**: 内存池是由多个内存块构成的链式结构，那么回收释放内存变的比较简单，可以遍历整个链表，逐一释放
 
 内存池在分配内存时，做的内存对齐的优化，我们可以看一下
-{% highlight c %}
+```c
 void *
 ngx_palloc(ngx_pool_t *pool, size_t size)
 {
@@ -88,13 +88,13 @@ ngx_palloc(ngx_pool_t *pool, size_t size)
     return ngx_palloc_large(pool, size);
 }
 
-{% endhighlight %}
+```
 
 其中实现内存对齐的函数 `ngx_align_ptr`定义如下：
 
-{% highlight c %} #define ngx_align_ptr(p, a)                                                   \
+```c #define ngx_align_ptr(p, a)                                                   \
     (u_char *) (((uintptr_t) (p) + ((uintptr_t) a - 1)) & ~((uintptr_t) a - 1))
-{% endhighlight %}
+```
 
 `对于内存块，有空余内存，但是，如果每次申请内存都比空余内存块大，怎么办？`
 
@@ -104,7 +104,7 @@ ngx_palloc(ngx_pool_t *pool, size_t size)
 
 `充分利用`，那么每次申请都应该尝试查看一下内存块的内存是否够用； `分配效率高`，如果发现内存一次不够，直接将current指针指向下一个内存块； 这两个是矛盾的，nginx做了一个取舍，如果发现内存块分配失败的次数超过了`4`次，则不在分配
 
-{% highlight c %}
+```c
 static void *
 ngx_palloc_block(ngx_pool_t *pool, size_t size)
 {
@@ -139,7 +139,7 @@ ngx_palloc_block(ngx_pool_t *pool, size_t size)
 
     return m;
 }
-{% endhighlight %}
+```
 
 ### 2.3 内存池的总体预览
 综合上面，通过下图可以看到一个内存池的总体结构

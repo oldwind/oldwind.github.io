@@ -33,14 +33,14 @@ tags:
 
 我们先看一下queue的数据结构定义，非常简明，就是两个指针，一个指向下一个节点的指针，一个指向上一个节点的指针，同时构成一个环形结构
 
-{% highlight c %}
+```c
 typedef struct ngx_queue_s  ngx_queue_t;
 
 struct ngx_queue_s {
     ngx_queue_t  *prev;
     ngx_queue_t  *next;
 };
-{% endhighlight %}
+```
 
 下面一张图是队列的示例图，展示单个节点到多节点队列的形成过程，环形列表构成的队列，作用是很明晰的，外部只需要定义一个 `ngx_queue_t * `，就可以操作这个队列
 
@@ -51,7 +51,7 @@ struct ngx_queue_s {
 
 我们选择一个使用了队列的结构体来说明一下，nginx中队列的使用，在nginx的配置分析中，关于location的配置信息使用到了队列， 我们可以看一下location的数据结构
 
-{% highlight c %}
+```c
 typedef struct {
     ngx_queue_t                      queue;
     ngx_http_core_loc_conf_t        *exact;
@@ -61,21 +61,21 @@ typedef struct {
     ngx_uint_t                       line;
     ngx_queue_t                      list;
 } ngx_http_location_queue_t;
-{% endhighlight %}
+```
 
 ![ngx_queue]({{site.baseurl}}/img/nginx/ngx_queue4.jpg)
 
 `ngx_queue_t list;    ngx_queue_t queue;`， 作为`ngx_http_location_queue_t`的成员变量，首先说明如何获取其它成员信息
 
-{% highlight c %}
+```c
 #define ngx_queue_data(q, type, link)  (type *) ((u_char *) q - offsetof(type, link))
-{% endhighlight %}
+```
 
 我们假设有一个成员变量是 ngx_http_location_queue_t 类型， 知道list的指针 `ngx_queue_t *`，如何获取 `name`信息呢，可以按照下面的代码
-{% highlight c %}
+```c
 // q 是 ngx_queue_t * 类型指针，在list位置存储
 ngx_http_location_queue_t *data = ngx_queue_data(q, ngx_http_location_queue_t, list )
-{% endhighlight %}
+```
 
 
 ## 四. 总结
