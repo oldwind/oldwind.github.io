@@ -33,7 +33,30 @@ tags:
 (lldb)
 ```
 
+```php
+<?php 
+function test() {
+    echo "it's test";
+    return 1;
+}
 
+$b = test();
+if ($b == 2) {
+    echo "it is not right";
+}
+
+class Mtest {
+    public $i = 100;
+}
+
+$obj = new Mtest();
+var_dump($obj->i);
+
+unset($obj);
+for ($i = 0; $i < 10; $i ++ ) {
+    echo "ssss\n";
+}
+```
 
 
 {% highlight c %}
@@ -51,43 +74,43 @@ Branch analysis from position: 18
 Branch analysis from position: 23
 Branch analysis from position: 18
 Branch analysis from position: 7
-filename:       /Users/baidu/work/git-test/baidu/personal-code/yebin02-test/tmp/test_gc.php
+filename:       /work/git-test/baidu/personal-code/yebin02-test/tmp/test_gc.php
 function name:  (null)
 number of ops:  24
 compiled vars:  !0 = $b, !1 = $obj, !2 = $i
 line     #* E I O op                           fetch          ext  return  operands
 -------------------------------------------------------------------------------------
-   5     0  E >   NOP                                                      
-  10     1        INIT_FCALL                                               'test'
+   2     0  E >   NOP                                                      
+   7     1        INIT_FCALL                                               'test'
          2        DO_FCALL                                      0  $3      
          3        ASSIGN                                                   !0, $3
-  11     4        IS_EQUAL                                         ~5      !0, 2
+   8     4        IS_EQUAL                                         ~5      !0, 2
          5      > JMPZ                                                     ~5, ->7
-  12     6    >   ECHO                                                     'it+is+not+right'
-  15     7    >   NOP                                                      
-  19     8        NEW                                              $7      :-3
+   9     6    >   ECHO                                                     'it+is+not+right'
+  12     7    >   NOP                                                      
+  17     8        NEW                                              $7      :-3
          9        DO_FCALL                                      0          
         10        ASSIGN                                                   !1, $7
-  20    11        INIT_FCALL                                               'var_dump'
+  18    11        INIT_FCALL                                               'var_dump'
         12        FETCH_OBJ_R                                      $10     !1, 'i'
         13        SEND_VAR                                                 $10
         14        DO_ICALL                                                 
-  23    15        UNSET_VAR                                                !1
-  24    16        ASSIGN                                                   !2, 0
+  20    15        UNSET_VAR                                                !1
+  21    16        ASSIGN                                                   !2, 0
         17      > JMP                                                      ->21
-  25    18    >   ECHO                                                     'ssss%0A'
-  24    19        POST_INC                                         ~13     !2
+  22    18    >   ECHO                                                     'ssss%0A'
+  21    19        POST_INC                                         ~13     !2
         20        FREE                                                     ~13
         21    >   IS_SMALLER                                       ~14     !2, 10
         22      > JMPNZ                                                    ~14, ->18
-  28    23    > > RETURN                                                   1
+  24    23    > > RETURN                                                   1
 
-branch: #  0; line:     5-   11; sop:     0; eop:     5; out0:   6; out1:   7
-branch: #  6; line:    12-   15; sop:     6; eop:     6; out0:   7
-branch: #  7; line:    15-   24; sop:     7; eop:    17; out0:  21
-branch: # 18; line:    25-   24; sop:    18; eop:    20; out0:  21
-branch: # 21; line:    24-   24; sop:    21; eop:    22; out0:  23; out1:  18; out2:  23; out3:  18
-branch: # 23; line:    28-   28; sop:    23; eop:    23; out0:  -2
+branch: #  0; line:     2-    8; sop:     0; eop:     5; out0:   6; out1:   7
+branch: #  6; line:     9-   12; sop:     6; eop:     6; out0:   7
+branch: #  7; line:    12-   21; sop:     7; eop:    17; out0:  21
+branch: # 18; line:    22-   21; sop:    18; eop:    20; out0:  21
+branch: # 21; line:    21-   21; sop:    21; eop:    22; out0:  23; out1:  18; out2:  23; out3:  18
+branch: # 23; line:    24-   24; sop:    23; eop:    23; out0:  -2
 path #1: 0, 6, 7, 21, 23, 
 path #2: 0, 6, 7, 21, 18, 21, 23, 
 path #3: 0, 6, 7, 21, 18, 21, 23, 
@@ -110,16 +133,15 @@ number of ops:  3
 compiled vars:  none
 line     #* E I O op                           fetch          ext  return  operands
 -------------------------------------------------------------------------------------
-   6     0  E >   ECHO                                                     'it%27s+test'
-   7     1      > RETURN                                                   1
-   8     2*     > RETURN                                                   null
+   3     0  E >   ECHO                                                     'it%27s+test'
+   4     1      > RETURN                                                   1
+   5     2*     > RETURN                                                   null
 
-branch: #  0; line:     6-    8; sop:     0; eop:     2
+branch: #  0; line:     3-    5; sop:     0; eop:     2
 path #1: 0, 
 End of function test
 
 Class Mtest: [no user functions]
-
 {% endhighlight %}
 
 
