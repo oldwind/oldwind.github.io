@@ -15,6 +15,14 @@ tags:
 
 
 
+## 二、装一下vld工具
+
+装一下vld扩展
+https://github.com/derickr/vld/
+
+php -m 查看一下
+
+
 
 
 
