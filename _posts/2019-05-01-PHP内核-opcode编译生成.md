@@ -1,7 +1,7 @@
 ---
 layout: content
 title: php内核opcode编译生成
-status: 2 
+status: 1 
 category: c and c++
 author:   "yimuren"
 tags:
@@ -12,21 +12,98 @@ tags:
 
 ## 一. 前言
 
+php的zend虚拟机在执行一个php的脚本过程中，经历了一系列"标准化"的流程，简单来说，包括词法分析、语法分析、生成opcode、执行opcode，关于对zend的opcode分析的文章也是不少，这里做了几件事
+1. 学习了各种关于opcode的文章
+2. 安装opcode分析的php扩展
+3. 在mac上通过lldb来调试
 
-
+核心的想法是把opcode的执行流程梳理一下，以及对opcode的核心指令做一下分析
 
 ## 二、装一下vld工具
 
-装一下vld扩展
-https://github.com/derickr/vld/
+实际上，我们在调试过程中，可以打印出opcode，但是具体的含义还是不清楚的，例如下面通过lldb打印的一条指令，opcode是一条枚举指令，用"\0"表示，"\0"是什么，可读性比较差，zend的vm为了可读性，设计了一个数组，数组的索引是 opcode，具体含义用 字符串做了标示， vld可以清晰的打印出这个字符串，增强了可读性，所以这里我们可以下一下vld扩展，帮助我们去了解opcode
 
-php -m 查看一下
+```bash
+(lldb) p op_array->opcodes[0]
+(zend_op) $50 = {
+  handler = 0x0000000100729800
+  op1 = (constant = 0, var = 0, num = 0, opline_num = 0, jmp_offset = 0)
+  op2 = (constant = 0, var = 0, num = 0, opline_num = 0, jmp_offset = 0)
+  result = (constant = 0, var = 0, num = 0, opline_num = 0, jmp_offset = 0)
+  extended_value = 0
+  lineno = 2
+  opcode = '\0'
+  op1_type = '\b'
+  op2_type = '\b'
+  result_type = '\b'
+}
+
+onst char *zend_vm_opcodes_map[173] = { }
+```
+
+### 2.1 安装过程
+
+> 下载地址：https://github.com/derickr/vld/  
+> git clone https://github.com/derickr/vld.git  
+> cd vld  
+> phpize  
+> ./configure  
+> make && make install  
+
+修改一下php.ini，将扩展加载进去 后面通过 `php -m` 查看一下
+
+
+### 2.2 执行
+
+```bash
+~/work/develope/php-7.0.29/bin/php -dvld.active=1  ./test_gc.php  
+```
+
+
+
+## 三. 核心数据结构分析
+
+
+```c
+struct _zend_op {
+	const void *handler;
+	znode_op op1;   // 操作数1
+	znode_op op2;   // 操作数2
+	znode_op result;  // 操作结果
+	uint32_t extended_value;
+	uint32_t lineno;
+	zend_uchar opcode;  
+	zend_uchar op1_type;  // 操作数1的类型
+	zend_uchar op2_type;   // 操作数2的类型
+	zend_uchar result_type;   // 操作结果类型
+};
+
+typedef union _znode_op {
+	uint32_t      constant;
+	uint32_t      var;
+	uint32_t      num;
+	uint32_t      opline_num; /*  Needs to be signed */
+#if ZEND_USE_ABS_JMP_ADDR
+	zend_op       *jmp_addr;
+#else
+	uint32_t      jmp_offset;
+#endif
+#if ZEND_USE_ABS_CONST_ADDR
+	zval          *zv;
+#endif
+} znode_op;
+```
+
+
+
+
+![opcodes结构图]({{site.baseurl}}/img/php/php5.4-opcodes.jpg)
 
 
 
 
 
-## 二
+
 
 ```bash
 (lldb) bt
@@ -158,4 +235,3 @@ Class Mtest: [no user functions]
 
 计划中
 
-![opcodes结构图]({{site.baseurl}}/img/php/php5.4-opcodes.jpg)
