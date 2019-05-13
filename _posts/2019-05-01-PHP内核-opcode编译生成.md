@@ -235,46 +235,66 @@ Class Mtest: [no user functions]
 
 ### 4.2 opcode代码的执行
 
+
+
 ```c
-ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) 
+ZEND_API void execute_ex(zend_execute_data *ex)
 {
-      ...
-      va_start(files, file_count);
-      for (i = 0; i < file_count; i++) {
-            file_handle = va_arg(files, zend_file_handle *);
-            if (!file_handle) {
-            	continue;
-            }           
+	DCL_OPLINE
 
-            // 编译生成opcode的数组
-            op_array = zend_compile_file(file_handle, type);
+#ifdef ZEND_VM_IP_GLOBAL_REG
+	const zend_op *orig_opline = opline;
+#endif
+#ifdef ZEND_VM_FP_GLOBAL_REG
+	zend_execute_data *orig_execute_data = execute_data;
+	execute_data = ex;
+#else
+	zend_execute_data *execute_data = ex;
+#endif
+	LOAD_OPLINE();
 
-            if (file_handle->opened_path) {
-            	zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
-            }
-            zend_destroy_file_handle(file_handle);
-            if (op_array) {
-
-                  // 执行 opcode数组
-            	zend_execute(op_array, retval);
-            	...
-            } else if (type==ZEND_REQUIRE) {
-            	va_end(files);
-            	return FAILURE;
-            }
-      }
-      ...
+	while (1) {
+#if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)
+    	int ret;
+#endif
+#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
+		((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		if (UNEXPECTED(!OPLINE)) {
+#else
+		if (UNEXPECTED((ret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)) != 0)) {
+#endif
+#ifdef ZEND_VM_FP_GLOBAL_REG
+			execute_data = orig_execute_data;
+# ifdef ZEND_VM_IP_GLOBAL_REG
+			opline = orig_opline;
+# endif
+			return;
+#else
+			if (EXPECTED(ret > 0)) {
+				execute_data = EG(current_execute_data);
+			} else {
+# ifdef ZEND_VM_IP_GLOBAL_REG
+				opline = orig_opline;
+# endif
+				return;
+			}
+#endif
+		}
+	}
+	zend_error_noreturn(E_CORE_ERROR, "Arrived at end of main loop which shouldn't happen");
 }
 ```
 
 我们看一下
 
 {% highlight bash %}
-* thread #1, queue = 'com.apple.main-thread', stop reason = step in
-  * frame #0: 0x00000001007296c7 php`zend_execute(op_array=0x000000010206d400, return_value=0x0000000000000000) at zend_vm_execute.h:445
-    frame #1: 0x00000001006c56a2 php`zend_execute_scripts(type=8, retval=0x0000000000000000, file_count=3) at zend.c:1445
-    frame #2: 0x000000010061bdf1 php`php_execute_script(primary_file=0x00007ffeefbff098) at main.c:2516
-    frame #3: 0x00000001007b56fd php`do_cli(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:977
-    frame #4: 0x00000001007b4691 php`main(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:1347
-    frame #5: 0x00007fff59379085 libdyld.dylib`start + 1
+(lldb) bt
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 9.1
+  * frame #0: 0x0000000100729634 php`execute_ex(ex=0x0000000102019030) at zend_vm_execute.h:417
+    frame #1: 0x000000010072979a php`zend_execute(op_array=0x000000010206d400, return_value=0x0000000000000000) at zend_vm_execute.h:458
+    frame #2: 0x00000001006c56a2 php`zend_execute_scripts(type=8, retval=0x0000000000000000, file_count=3) at zend.c:1445
+    frame #3: 0x000000010061bdf1 php`php_execute_script(primary_file=0x00007ffeefbff098) at main.c:2516
+    frame #4: 0x00000001007b56fd php`do_cli(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:977
+    frame #5: 0x00000001007b4691 php`main(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:1347
+    frame #6: 0x00007fff59379085 libdyld.dylib`start + 1
 {% endhighlight %}
