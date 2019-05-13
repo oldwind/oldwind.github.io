@@ -59,6 +59,57 @@ onst char *zend_vm_opcodes_map[173] = { }
 ~/work/develope/php-7.0.29/bin/php -dvld.active=1  ./test_gc.php  
 ```
 
+### 2.3 vld扩展的变量命名
+
+
+
+```c
+int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsigned int base_address, zend_op_array *op_array, int opline TSRMLS_DC)
+{
+    ...
+    switch (node_type) {
+        case IS_UNUSED:
+            VLD_PRINT(3, " IS_UNUSED ");
+            break;
+        case IS_CONST: /* 1 */
+            VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(zval));
+...
+            break;
+
+        case IS_TMP_VAR: /* 2 */
+            VLD_PRINT(3, " IS_TMP_VAR ");
+            len += vld_printf (stderr, "~%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
+            break;
+        case IS_VAR: /* 4 */
+            VLD_PRINT(3, " IS_VAR ");
+            len += vld_printf (stderr, "$%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
+            break;
+        case IS_CV:  /* 16 */
+            VLD_PRINT(3, " IS_CV ");
+            len += vld_printf (stderr, "!%d", (VLD_ZNODE_ELEM(node, var)-sizeof(zend_execute_data)) / sizeof(zval));
+            break;
+        case VLD_IS_OPNUM:
+            len += vld_printf (stderr, "->%d", VLD_ZNODE_JMP_LINE(node, opline, base_address));
+            break;
+        case VLD_IS_OPLINE:
+            len += vld_printf (stderr, "->%d", VLD_ZNODE_JMP_LINE(node, opline, base_address));
+            break;
+        case VLD_IS_CLASS:
+            len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
+            break;
+...
+        default:
+            return 0;
+    }
+    return len;
+}
+
+
+```
+
+
+
+
 ## 三. 核心数据结构分析
 
 这里先说一下，选择的php的版本是7.0.29，
