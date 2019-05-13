@@ -19,7 +19,7 @@ php的zend虚拟机在执行一个php的脚本过程中，经历了一系列"标
 
 核心的想法是把opcode的执行流程梳理一下，以及对opcode的核心指令做一下分析
 
-## 二. 装一下vld工具
+## 二. vld工具安装
 
 实际上，我们在调试过程中，可以打印出opcode，但是具体的含义还是不清楚的，例如下面通过lldb打印的一条指令，opcode是一条枚举指令，用"\0"表示，"\0"是什么，可读性比较差，zend的vm为了可读性，设计了一个数组，数组的索引是 opcode，具体含义用 字符串做了标示， vld可以清晰的打印出这个字符串，增强了可读性，所以这里我们可以下一下vld扩展，帮助我们去了解opcode
 
@@ -59,8 +59,36 @@ onst char *zend_vm_opcodes_map[173] = { }
 ~/work/develope/php-7.0.29/bin/php -dvld.active=1  ./test_gc.php  
 ```
 
-### 2.3 vld扩展的变量命名
+### 2.3 vld下opcode的阅读
 
+我们先看一下用vld查看opcode的简单栗子，
+
+
+{% highlight c %}
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   2     0  E >   NOP                                                      
+   7     1        INIT_FCALL                                               'test'
+         2        DO_FCALL                                      0  $3      
+         3        ASSIGN                                                   !0, $3
+   8     4        IS_EQUAL                                         ~5      !0, 2
+         5      > JMPZ                                                     ~5, ->7
+{% endhighlight %}
+
+
+标题的含义大体如下
+- `line`, 写的php的的代码行号，
+- `#*`， opcode的顺序
+- `E`
+- `I`
+- `O`
+- `op`， 操作码的名称，在zend_vm_codes.c中定义了一个map关系 zend_vm_opcodes_map
+- `fetch`
+- `ext`
+- `return`
+- `operands`
+
+对于任意一个变量，zend虚拟机中都会重新修改变量的名字，
 
 
 ```c
