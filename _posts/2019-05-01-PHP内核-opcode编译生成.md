@@ -343,7 +343,7 @@ Branch analysis from position: 18
 Branch analysis from position: 23
 Branch analysis from position: 18
 Branch analysis from position: 7
-filename:       /work/git-test/baidu/personal-code/yebin02-test/tmp/test_gc.php
+filename:           /personal-code/yebin02-test/tmp/test_gc.php
 function name:  (null)
 number of ops:  24
 compiled vars:  !0 = $b, !1 = $obj, !2 = $i
@@ -396,7 +396,7 @@ Function test:
 Finding entry points
 Branch analysis from position: 0
 1 jumps found. (Code = 62) Position 1 = -2
-filename:       /Users/baidu/work/git-test/baidu/personal-code/yebin02-test/tmp/test_gc.php
+filename:               /personal-code/yebin02-test/tmp/test_gc.php
 function name:  test
 number of ops:  3
 compiled vars:  none
