@@ -64,6 +64,168 @@ onst char *zend_vm_opcodes_map[173] = { }
 这里先说一下，选择的php的版本是7.0.29，
 
 ```c
+struct _zend_compiler_globals {
+    zend_stack loop_var_stack;
+
+    zend_class_entry *active_class_entry;
+
+    zend_string *compiled_filename;
+
+    int zend_lineno;
+
+    zend_op_array *active_op_array;
+
+    HashTable *function_table;    /* function symbol table */
+    HashTable *class_table;        /* class table */
+
+    HashTable filenames_table;
+
+    HashTable *auto_globals;
+
+    zend_bool parse_error;
+    zend_bool in_compilation;
+    zend_bool short_tags;
+
+    zend_bool unclean_shutdown;
+
+    zend_bool ini_parser_unbuffered_errors;
+
+    zend_llist open_files;
+
+    struct _zend_ini_parser_param *ini_parser_param;
+
+    uint32_t start_lineno;
+    zend_bool increment_lineno;
+
+    zend_string *doc_comment;
+
+    uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
+
+    HashTable const_filenames;
+
+    zend_oparray_context context;
+    zend_file_context file_context;
+
+    zend_arena *arena;
+
+    zend_string *empty_string;
+    zend_string *one_char_string[256];
+
+    HashTable interned_strings;
+
+    const zend_encoding **script_encoding_list;
+    size_t script_encoding_list_size;
+    zend_bool multibyte;
+    zend_bool detect_unicode;
+    zend_bool encoding_declared;
+
+    zend_ast *ast;
+    zend_arena *ast_arena;
+
+    zend_stack delayed_oplines_stack;
+
+#ifdef ZTS
+    zval **static_members_table;
+    int last_static_member;
+#endif
+};
+
+
+struct _zend_executor_globals {
+    zval uninitialized_zval;
+    zval error_zval;
+
+    /* symbol table cache */
+    zend_array *symtable_cache[SYMTABLE_CACHE_SIZE];
+    zend_array **symtable_cache_limit;
+    zend_array **symtable_cache_ptr;
+
+    zend_array symbol_table;        /* main symbol table */
+
+    HashTable included_files;    /* files already included */
+
+    JMP_BUF *bailout;
+
+    int error_reporting;
+    int exit_status;
+
+    HashTable *function_table;    /* function symbol table */
+    HashTable *class_table;        /* class table */
+    HashTable *zend_constants;    /* constants table */
+
+    zval          *vm_stack_top;
+    zval          *vm_stack_end;
+    zend_vm_stack  vm_stack;
+
+    struct _zend_execute_data *current_execute_data;
+    zend_class_entry *scope;
+
+    zend_long precision;
+
+    int ticks_count;
+
+    HashTable *in_autoload;
+    zend_function *autoload_func;
+    zend_bool full_tables_cleanup;
+
+    /* for extended information support */
+    zend_bool no_extensions;
+
+#ifdef ZEND_WIN32
+    zend_bool timed_out;
+    OSVERSIONINFOEX windows_version_info;
+#endif
+
+    HashTable regular_list;
+    HashTable persistent_list;
+
+    int user_error_handler_error_reporting;
+    zval user_error_handler;
+    zval user_exception_handler;
+    zend_stack user_error_handlers_error_reporting;
+    zend_stack user_error_handlers;
+    zend_stack user_exception_handlers;
+
+    zend_error_handling_t  error_handling;
+    zend_class_entry      *exception_class;
+
+    /* timeout support */
+    zend_long timeout_seconds;
+
+    int lambda_count;
+
+    HashTable *ini_directives;
+    HashTable *modified_ini_directives;
+    zend_ini_entry *error_reporting_ini_entry;
+
+    zend_objects_store objects_store;
+    zend_object *exception, *prev_exception;
+    const zend_op *opline_before_exception;
+    zend_op exception_op[3];
+
+    struct _zend_module_entry *current_module;
+
+    zend_bool active;
+    zend_bool valid_symbol_table;
+
+    zend_long assertions;
+
+    uint32_t           ht_iterators_count;     /* number of allocatd slots */
+    uint32_t           ht_iterators_used;      /* number of used slots */
+    HashTableIterator *ht_iterators;
+    HashTableIterator  ht_iterators_slots[16];
+
+    void *saved_fpu_cw_ptr;
+#if XPFPA_HAVE_CW
+    XPFPA_CW_DATATYPE saved_fpu_cw;
+#endif
+
+    zend_function trampoline;
+    zend_op       call_trampoline_op;
+
+    void *reserved[ZEND_MAX_RESERVED_RESOURCES];
+};
+
 struct _zend_op {
     const void *handler;
     znode_op op1;   // 操作数1
