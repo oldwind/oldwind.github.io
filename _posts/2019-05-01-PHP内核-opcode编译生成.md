@@ -65,30 +65,30 @@ onst char *zend_vm_opcodes_map[173] = { }
 
 ```c
 struct _zend_op {
-	const void *handler;
-	znode_op op1;   // 操作数1
-	znode_op op2;   // 操作数2
-	znode_op result;  // 操作结果
-	uint32_t extended_value;
-	uint32_t lineno;
-	zend_uchar opcode;  
-	zend_uchar op1_type;  // 操作数1的类型
-	zend_uchar op2_type;   // 操作数2的类型
-	zend_uchar result_type;   // 操作结果类型
+    const void *handler;
+    znode_op op1;   // 操作数1
+    znode_op op2;   // 操作数2
+    znode_op result;  // 操作结果
+    uint32_t extended_value;
+    uint32_t lineno;
+    zend_uchar opcode;  
+    zend_uchar op1_type;  // 操作数1的类型
+    zend_uchar op2_type;   // 操作数2的类型
+    zend_uchar result_type;   // 操作结果类型
 };
 
 typedef union _znode_op {
-	uint32_t      constant;
-	uint32_t      var;
-	uint32_t      num;
-	uint32_t      opline_num; /*  Needs to be signed */
+    uint32_t      constant;
+    uint32_t      var;
+    uint32_t      num;
+    uint32_t      opline_num; /*  Needs to be signed */
 #if ZEND_USE_ABS_JMP_ADDR
-	zend_op       *jmp_addr;
+    zend_op       *jmp_addr;
 #else
-	uint32_t      jmp_offset;
+    uint32_t      jmp_offset;
 #endif
 #if ZEND_USE_ABS_CONST_ADDR
-	zval          *zv;
+    zval          *zv;
 #endif
 } znode_op;
 ```
@@ -240,54 +240,54 @@ Class Mtest: [no user functions]
 ```c
 ZEND_API void execute_ex(zend_execute_data *ex)
 {
-	DCL_OPLINE
+    DCL_OPLINE
 
 #ifdef ZEND_VM_IP_GLOBAL_REG
-	const zend_op *orig_opline = opline;
+    const zend_op *orig_opline = opline;
 #endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
-	zend_execute_data *orig_execute_data = execute_data;
-	execute_data = ex;
+    zend_execute_data *orig_execute_data = execute_data;
+    execute_data = ex;
 #else
-	zend_execute_data *execute_data = ex;
+    zend_execute_data *execute_data = ex;
 #endif
-	LOAD_OPLINE();
+    LOAD_OPLINE();
 
-	while (1) {
+    while (1) {
 #if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)
-    	int ret;
+        int ret;
 #endif
 #if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
-		((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-		if (UNEXPECTED(!OPLINE)) {
+        ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+        if (UNEXPECTED(!OPLINE)) {
 #else
-		if (UNEXPECTED((ret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)) != 0)) {
+        if (UNEXPECTED((ret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)) != 0)) {
 #endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
-			execute_data = orig_execute_data;
+            execute_data = orig_execute_data;
 # ifdef ZEND_VM_IP_GLOBAL_REG
-			opline = orig_opline;
+            opline = orig_opline;
 # endif
-			return;
+            return;
 #else
-			if (EXPECTED(ret > 0)) {
-				execute_data = EG(current_execute_data);
-			} else {
+            if (EXPECTED(ret > 0)) {
+                execute_data = EG(current_execute_data);
+            } else {
 # ifdef ZEND_VM_IP_GLOBAL_REG
-				opline = orig_opline;
+                opline = orig_opline;
 # endif
-				return;
-			}
+                return;
+            }
 #endif
-		}
-	}
-	zend_error_noreturn(E_CORE_ERROR, "Arrived at end of main loop which shouldn't happen");
+        }
+    }
+    zend_error_noreturn(E_CORE_ERROR, "Arrived at end of main loop which shouldn't happen");
 }
 ```
 
 我们看一下
 
-{% highlight bash %}
+{% highlight c %}
 (lldb) bt
 * thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 9.1
   * frame #0: 0x0000000100729634 php`execute_ex(ex=0x0000000102019030) at zend_vm_execute.h:417
