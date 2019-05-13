@@ -19,7 +19,7 @@ php的zend虚拟机在执行一个php的脚本过程中，经历了一系列"标
 
 核心的想法是把opcode的执行流程梳理一下，以及对opcode的核心指令做一下分析
 
-## 二、装一下vld工具
+## 二. 装一下vld工具
 
 实际上，我们在调试过程中，可以打印出opcode，但是具体的含义还是不清楚的，例如下面通过lldb打印的一条指令，opcode是一条枚举指令，用"\0"表示，"\0"是什么，可读性比较差，zend的vm为了可读性，设计了一个数组，数组的索引是 opcode，具体含义用 字符串做了标示， vld可以清晰的打印出这个字符串，增强了可读性，所以这里我们可以下一下vld扩展，帮助我们去了解opcode
 
@@ -59,10 +59,9 @@ onst char *zend_vm_opcodes_map[173] = { }
 ~/work/develope/php-7.0.29/bin/php -dvld.active=1  ./test_gc.php  
 ```
 
-
-
 ## 三. 核心数据结构分析
 
+这里先说一下，选择的php的版本是7.0.29，
 
 ```c
 struct _zend_op {
@@ -102,6 +101,8 @@ typedef union _znode_op {
 
 
 
+## 四. 数据流程
+
 
 
 
@@ -117,6 +118,8 @@ typedef union _znode_op {
     frame #6: 0x00007fff59379085 libdyld.dylib`start + 1
 (lldb)
 ```
+
+### 4.1 数据的编译分析
 
 ```php
 <?php 
@@ -230,8 +233,48 @@ Class Mtest: [no user functions]
 {% endhighlight %}
 
 
+### 4.2 opcode代码的执行
 
+```c
+ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) 
+{
+      ...
+      va_start(files, file_count);
+      for (i = 0; i < file_count; i++) {
+            file_handle = va_arg(files, zend_file_handle *);
+            if (!file_handle) {
+            	continue;
+            }           
 
+            // 编译生成opcode的数组
+            op_array = zend_compile_file(file_handle, type);
 
-计划中
+            if (file_handle->opened_path) {
+            	zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
+            }
+            zend_destroy_file_handle(file_handle);
+            if (op_array) {
 
+                  // 执行 opcode数组
+            	zend_execute(op_array, retval);
+            	...
+            } else if (type==ZEND_REQUIRE) {
+            	va_end(files);
+            	return FAILURE;
+            }
+      }
+      ...
+}
+```
+
+我们看一下
+
+{% highlight bash %}
+* thread #1, queue = 'com.apple.main-thread', stop reason = step in
+  * frame #0: 0x00000001007296c7 php`zend_execute(op_array=0x000000010206d400, return_value=0x0000000000000000) at zend_vm_execute.h:445
+    frame #1: 0x00000001006c56a2 php`zend_execute_scripts(type=8, retval=0x0000000000000000, file_count=3) at zend.c:1445
+    frame #2: 0x000000010061bdf1 php`php_execute_script(primary_file=0x00007ffeefbff098) at main.c:2516
+    frame #3: 0x00000001007b56fd php`do_cli(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:977
+    frame #4: 0x00000001007b4691 php`main(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:1347
+    frame #5: 0x00007fff59379085 libdyld.dylib`start + 1
+{% endhighlight %}
