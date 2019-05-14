@@ -121,7 +121,7 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 
 ## 三. Zend虚拟机处理的思考
 
-我们看一下php的cli在处理脚本的时候的函数调用栈，从 `frame #3` 到 `frame #2`，是Application到Zend Engine的一个转换过程，在php的源码中，zend虚拟机被抽象出一个独立的模块，放在 Zend目录下面； main目录一下，应该处理不通方式对zend虚拟机的调用
+我们看一下php的cli在处理脚本的时候的函数调用栈，从 `frame #3` 到 `frame #2`，是Application到Zend Engine的一个转换过程，在php的源码中，zend虚拟机被抽象出一个独立的模块，放在 Zend目录下面； 在main目录一下，应该处理不同方式对zend虚拟机的调用
 
 {% highlight c %}
 (lldb) bt
@@ -135,8 +135,18 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
     frame #6: 0x00007fff59379085 libdyld.dylib`start + 1
 {% endhighlight %}
 
+Zend虚拟机作为一个独立的模块，暴露给外部的接口有哪些，是我们需要关注的，我们可以思考一下，分分类
+- 1、我们先看生命周期，实际上，不论一个程序、函数还是一个模块，都拥有他的生命周期，包含程序的初始化、启动、执行、结束等等，对于zend虚拟机来说，也是如此，他作为一个独立的模块，在设计中，需要考虑提供给外部调用者，不同生命周期调用不同的接口，去实现整个服务的提供，zend虚拟机在 Zend/zend.h 文件中定义各种阶段函数的调起
 
+```c
+int zend_startup(zend_utility_functions *utility_functions, char **extensions);
+void zend_shutdown(void);
+void zend_register_standard_ini_entries(void);
+void zend_post_startup(void);
+void zend_set_utility_values(zend_utility_values *utility_values);
+```
 
+- 2、zend_API.h，php提供了很多外部能力，例如，可以做扩展方面的开发，扩展的开发必然会和zend虚拟机进行交互，道理比较简单，虚拟机对php的脚本进行编译分析，生成opcode，然后执行opcode，对于扩展定义的class或者function，必然有参数信息的传递，这种时候扩展的开发，必然用到虚拟机提供的api，相关api在zend_API.h中做了定义，当然，还有一些别的功能，这里不在细述
 
 
 
