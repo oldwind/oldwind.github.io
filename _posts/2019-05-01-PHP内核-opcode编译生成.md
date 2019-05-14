@@ -115,202 +115,37 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
             VLD_PRINT(3, " IS_TMP_VAR ");
             len += vld_printf (stderr, "~%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
             break;
-        case IS_VAR: /* 4 */
-            VLD_PRINT(3, " IS_VAR ");
-            len += vld_printf (stderr, "$%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
-            break;
-        case IS_CV:  /* 16 */
-            VLD_PRINT(3, " IS_CV ");
-            len += vld_printf (stderr, "!%d", (VLD_ZNODE_ELEM(node, var)-sizeof(zend_execute_data)) / sizeof(zval));
-            break;
-        case VLD_IS_OPNUM:
-            len += vld_printf (stderr, "->%d", VLD_ZNODE_JMP_LINE(node, opline, base_address));
-            break;
-        case VLD_IS_OPLINE:
-            len += vld_printf (stderr, "->%d", VLD_ZNODE_JMP_LINE(node, opline, base_address));
-            break;
-        case VLD_IS_CLASS:
-            len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
-            break;
 ...
-        default:
-            return 0;
-    }
-    return len;
 }
-
-
 ```
 
+## 三. Zend虚拟机处理的思考
+
+我们看一下php的cli在处理脚本的时候的函数调用栈，从 `frame #3` 到 `frame #2`，是Application到Zend Engine的一个转换过程，在php的源码中，zend虚拟机被抽象出一个独立的模块，放在 Zend目录下面； main目录一下，应该处理不通方式对zend虚拟机的调用
+
+{% highlight c %}
+(lldb) bt
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 9.1
+  * frame #0: 0x0000000100729634 php`execute_ex(ex=0x0000000102019030) at zend_vm_execute.h:417
+    frame #1: 0x000000010072979a php`zend_execute(op_array=0x000000010206d400, return_value=0x0000000000000000) at zend_vm_execute.h:458
+    frame #2: 0x00000001006c56a2 php`zend_execute_scripts(type=8, retval=0x0000000000000000, file_count=3) at zend.c:1445
+    frame #3: 0x000000010061bdf1 php`php_execute_script(primary_file=0x00007ffeefbff098) at main.c:2516
+    frame #4: 0x00000001007b56fd php`do_cli(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:977
+    frame #5: 0x00000001007b4691 php`main(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:1347
+    frame #6: 0x00007fff59379085 libdyld.dylib`start + 1
+{% endhighlight %}
 
 
 
-## 三. 核心数据结构分析
+
+
+
+
+## 四. 核心数据结构分析
 
 这里先说一下，选择的php的版本是7.0.29，
 
 ```c
-struct _zend_compiler_globals {
-    zend_stack loop_var_stack;
-
-    zend_class_entry *active_class_entry;
-
-    zend_string *compiled_filename;
-
-    int zend_lineno;
-
-    zend_op_array *active_op_array;
-
-    HashTable *function_table;    /* function symbol table */
-    HashTable *class_table;        /* class table */
-
-    HashTable filenames_table;
-
-    HashTable *auto_globals;
-
-    zend_bool parse_error;
-    zend_bool in_compilation;
-    zend_bool short_tags;
-
-    zend_bool unclean_shutdown;
-
-    zend_bool ini_parser_unbuffered_errors;
-
-    zend_llist open_files;
-
-    struct _zend_ini_parser_param *ini_parser_param;
-
-    uint32_t start_lineno;
-    zend_bool increment_lineno;
-
-    zend_string *doc_comment;
-
-    uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
-
-    HashTable const_filenames;
-
-    zend_oparray_context context;
-    zend_file_context file_context;
-
-    zend_arena *arena;
-
-    zend_string *empty_string;
-    zend_string *one_char_string[256];
-
-    HashTable interned_strings;
-
-    const zend_encoding **script_encoding_list;
-    size_t script_encoding_list_size;
-    zend_bool multibyte;
-    zend_bool detect_unicode;
-    zend_bool encoding_declared;
-
-    zend_ast *ast;
-    zend_arena *ast_arena;
-
-    zend_stack delayed_oplines_stack;
-
-#ifdef ZTS
-    zval **static_members_table;
-    int last_static_member;
-#endif
-};
-
-
-struct _zend_executor_globals {
-    zval uninitialized_zval;
-    zval error_zval;
-
-    /* symbol table cache */
-    zend_array *symtable_cache[SYMTABLE_CACHE_SIZE];
-    zend_array **symtable_cache_limit;
-    zend_array **symtable_cache_ptr;
-
-    zend_array symbol_table;        /* main symbol table */
-
-    HashTable included_files;    /* files already included */
-
-    JMP_BUF *bailout;
-
-    int error_reporting;
-    int exit_status;
-
-    HashTable *function_table;    /* function symbol table */
-    HashTable *class_table;        /* class table */
-    HashTable *zend_constants;    /* constants table */
-
-    zval          *vm_stack_top;
-    zval          *vm_stack_end;
-    zend_vm_stack  vm_stack;
-
-    struct _zend_execute_data *current_execute_data;
-    zend_class_entry *scope;
-
-    zend_long precision;
-
-    int ticks_count;
-
-    HashTable *in_autoload;
-    zend_function *autoload_func;
-    zend_bool full_tables_cleanup;
-
-    /* for extended information support */
-    zend_bool no_extensions;
-
-#ifdef ZEND_WIN32
-    zend_bool timed_out;
-    OSVERSIONINFOEX windows_version_info;
-#endif
-
-    HashTable regular_list;
-    HashTable persistent_list;
-
-    int user_error_handler_error_reporting;
-    zval user_error_handler;
-    zval user_exception_handler;
-    zend_stack user_error_handlers_error_reporting;
-    zend_stack user_error_handlers;
-    zend_stack user_exception_handlers;
-
-    zend_error_handling_t  error_handling;
-    zend_class_entry      *exception_class;
-
-    /* timeout support */
-    zend_long timeout_seconds;
-
-    int lambda_count;
-
-    HashTable *ini_directives;
-    HashTable *modified_ini_directives;
-    zend_ini_entry *error_reporting_ini_entry;
-
-    zend_objects_store objects_store;
-    zend_object *exception, *prev_exception;
-    const zend_op *opline_before_exception;
-    zend_op exception_op[3];
-
-    struct _zend_module_entry *current_module;
-
-    zend_bool active;
-    zend_bool valid_symbol_table;
-
-    zend_long assertions;
-
-    uint32_t           ht_iterators_count;     /* number of allocatd slots */
-    uint32_t           ht_iterators_used;      /* number of used slots */
-    HashTableIterator *ht_iterators;
-    HashTableIterator  ht_iterators_slots[16];
-
-    void *saved_fpu_cw_ptr;
-#if XPFPA_HAVE_CW
-    XPFPA_CW_DATATYPE saved_fpu_cw;
-#endif
-
-    zend_function trampoline;
-    zend_op       call_trampoline_op;
-
-    void *reserved[ZEND_MAX_RESERVED_RESOURCES];
-};
 
 struct _zend_op {
     const void *handler;
@@ -554,14 +389,3 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 
 我们看一下
 
-{% highlight c %}
-(lldb) bt
-* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 9.1
-  * frame #0: 0x0000000100729634 php`execute_ex(ex=0x0000000102019030) at zend_vm_execute.h:417
-    frame #1: 0x000000010072979a php`zend_execute(op_array=0x000000010206d400, return_value=0x0000000000000000) at zend_vm_execute.h:458
-    frame #2: 0x00000001006c56a2 php`zend_execute_scripts(type=8, retval=0x0000000000000000, file_count=3) at zend.c:1445
-    frame #3: 0x000000010061bdf1 php`php_execute_script(primary_file=0x00007ffeefbff098) at main.c:2516
-    frame #4: 0x00000001007b56fd php`do_cli(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:977
-    frame #5: 0x00000001007b4691 php`main(argc=2, argv=0x00007ffeefbff7a0) at php_cli.c:1347
-    frame #6: 0x00007fff59379085 libdyld.dylib`start + 1
-{% endhighlight %}
