@@ -88,8 +88,15 @@ line     #* E I O op                           fetch          ext  return  opera
 - `return`
 - `operands`
 
-对于任意一个变量，zend虚拟机中都会重新修改变量的名字，
-
+对于任意一个变量，zend虚拟机中都会重新修改变量的名字，vld在展示的时候，用符号做了一下区分，由于没有相关文档说明，我们翻一下vld的代码，可以看到，其中
+- IS_UNUSED           对于定义了，但是没有使用的变量，vld不展示
+- IS_CONST            对于常量，vld，直接展示长量值
+- IS_TMP_VAR    `～`  标示变量是一个临时变量，例如在一个fuction内部定义的变量
+- IS_VAR        `$`   
+- IS_CV         `!`   Compiled variable, 编译中产生的中间变量，类似缓存，例如 function的参数，会生成中间变量存储调用过程中传递的参数值
+- VLD_IS_OPNUM  `->`
+- VLD_IS_OPLINE `->`
+- VLD_IS_CLASS  `:`   标示操作数是一个class变量  
 
 ```c
 int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsigned int base_address, zend_op_array *op_array, int opline TSRMLS_DC)
