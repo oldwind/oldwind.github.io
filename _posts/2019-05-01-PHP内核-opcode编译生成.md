@@ -148,6 +148,33 @@ void zend_set_utility_values(zend_utility_values *utility_values);
 
 - 2、zend_API.h，php提供了很多外部能力，例如，可以做扩展方面的开发，扩展的开发必然会和zend虚拟机进行交互，道理比较简单，虚拟机对php的脚本进行编译分析，生成opcode，然后执行opcode，对于扩展定义的class或者function，必然有参数信息的传递，这种时候扩展的开发，必然用到虚拟机提供的api，相关api在zend_API.h中做了定义，当然，还有一些别的功能，这里不在细述
 
+**Zend虚拟机核心做了两件事情，一是编译php代码，二是执行php代码**， 我们看一下实现的代码,我们能看出来，zend虚拟机采用的方式是，编译一个文件，执行一个文件的opcode，因为opcode的执行是在文件级别，所以函数的定义和使用在
+
+```c
+ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...)
+{
+......
+    for (i = 0; i < file_count; i++) {
+        file_handle = va_arg(files, zend_file_handle *);
+        if (!file_handle) {
+            continue;
+        }
+
+        op_array = zend_compile_file(file_handle, type);
+        ......
+        zend_destroy_file_handle(file_handle);
+        if (op_array) {
+            zend_execute(op_array, retval);
+            ......
+        } else if (type==ZEND_REQUIRE) {
+            va_end(files);
+            return FAILURE;
+        }
+    }
+......
+}
+```
+
 
 
 
@@ -213,7 +240,7 @@ struct _zend_execute_data {
 
 
 
-## 四. 数据流程
+## 五. 数据流程
 
 
 
