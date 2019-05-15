@@ -225,7 +225,15 @@ line     #* E I O op                           fetch          ext  return  opera
 
 
 
+```flow
+st=>start: Start
+e=>end: End
+op1=>operation: My Operation
+sub1=>subroutine: My Subroutine
+cond=>condition: Yes or No?
+io=>inputoutput: catch something...
 
+```
 
 
 ## 四. 核心数据结构分析

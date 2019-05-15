@@ -2,13 +2,13 @@
 
     .post-container,
     .sidebar-container {
-        padding-right: 5%
+        padding-right: 3%
     }
 }
 
 @media (min-width:768px) {
     .post-container {
-        padding-right: 5%
+        padding-right: 3%
     }
 }
 
@@ -1125,9 +1125,10 @@ body {
     list-style: none;
     height: auto;
     overflow: hidden;
-    padding-left: 0;
+    padding-left: 5px;
     padding-right: 5px;
-    text-indent: 0
+    text-indent: 0;
+    border-left: #bfbfbf solid 1px
 }
 
 .side-catalog .catalog-body li {
