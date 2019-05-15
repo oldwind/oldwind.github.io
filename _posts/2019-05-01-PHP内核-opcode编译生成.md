@@ -1,6 +1,6 @@
 ---
 layout: content
-title: php内核opcode编译生成
+title: php内核opcode编译执行
 status: 1 
 category: c and c++
 author:   "yimuren"
@@ -223,16 +223,6 @@ line     #* E I O op                           fetch          ext  return  opera
 
 {% endhighlight%}
 
-
-
-```flow
-st=>start: Start
-e=>end: End
-op1=>operation: My Operation
-sub1=>subroutine: My Subroutine
-cond=>condition: Yes or No?
-
-```
 
 
 ## 四. 核心数据结构分析
