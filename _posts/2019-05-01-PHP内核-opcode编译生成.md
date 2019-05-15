@@ -121,6 +121,7 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 
 ## 三. Zend虚拟机处理的思考
 
+### 3.1 zend模块设计思考
 我们看一下php的cli在处理脚本的时候的函数调用栈，从 `frame #3` 到 `frame #2`，是Application到Zend Engine的一个转换过程，在php的源码中，zend虚拟机被抽象出一个独立的模块，放在 Zend目录下面； 在main目录一下，应该处理不同方式对zend虚拟机的调用
 
 {% highlight c %}
@@ -148,7 +149,10 @@ void zend_set_utility_values(zend_utility_values *utility_values);
 
 - 2、zend_API.h，php提供了很多外部能力，例如，可以做扩展方面的开发，扩展的开发必然会和zend虚拟机进行交互，道理比较简单，虚拟机对php的脚本进行编译分析，生成opcode，然后执行opcode，对于扩展定义的class或者function，必然有参数信息的传递，这种时候扩展的开发，必然用到虚拟机提供的api，相关api在zend_API.h中做了定义，当然，还有一些别的功能，这里不在细述
 
-**Zend虚拟机核心做了两件事情，一是编译php代码，二是执行php代码**， 我们看一下实现的代码,我们能看出来，zend虚拟机采用的方式是，编译一个文件，执行一个文件的opcode，因为opcode的执行是在文件级别，所以函数的定义和使用在
+
+### 3.2 编译执行
+
+**Zend虚拟机核心做了两件事情，一是编译php代码，二是执行php代码**， 我们看一下实现的代码,我们能看出来，zend虚拟机采用的方式是，编译一个文件，执行一个文件的opcode，opcode的执行是在文件级别，另外和c语言不同的是，php的函数不需要先声明在使用
 
 ```c
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...)
@@ -174,6 +178,52 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...)
 ......
 }
 ```
+
+举个栗子， 下面的代码执行是没有问题的，因为php是分析完一个文件再执行的，`并不是一行代码一行代码的分析`，所以zend虚拟机可以找到t函数的定义
+
+```php
+<?php
+echo t();
+
+function t() {
+    $c = 1;
+    return $c;
+}
+```
+
+另外一种情况，在使用include的时候，则是需要关注前后关系，例如，a.php文件是
+```php
+<?php
+// a.php
+include "b.php"
+echo t();
+//include "b.php"
+```
+
+如果include "b.php" 放在 使用t函数后面，则会出现函数找不到的错误
+
+```php
+<?php
+// b.php
+function t() {
+    $c = 1;
+    return $c;
+}
+```
+
+具体的原因分析，应该比较简单，可以看一致include的opcode指令，看看虚拟机对该指令的处理
+
+{% highlight c%}
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   2     0  E >   INCLUDE_OR_EVAL                                          'test_gc.php', INCLUDE
+   3     1        INIT_FCALL_BY_NAME                                       'test'
+         2        DO_FCALL_BY_NAME                                         
+  32     3      > RETURN                                                   1
+
+{% endhighlight%}
+
+
 
 
 
