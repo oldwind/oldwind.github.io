@@ -224,6 +224,13 @@ line     #* E I O op                           fetch          ext  return  opera
 {% endhighlight%}
 
 
+## 四. Zend虚拟机编译细节分析
+
+先看一下下面一张图，重点描述一下zend的编译过程，zend的编译过程，是把php开发者开发的php代码编译成 opcodes的一个过程，在这个过程中，重点分成下面几个步骤：
+
+
+![]({{site.baseurl}}/img/tech/2019-05-16-16-17-27.png)
+
 
 ## 四. 核心数据结构分析
 
