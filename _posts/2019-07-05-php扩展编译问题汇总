@@ -1,0 +1,21 @@
+---
+layout: content
+title: php扩展编译问题汇总
+status: 1 
+category: c and c++
+author:   "yimuren"
+tags:
+    - php
+    - c
+---
+
+
+
+
+
+PHP Warning:  PHP Startup: Unable to load dynamic library '/home/users/yebin02/php-debug/php-src-PHP-7.0.33-install/ext/extension/xchain.so' - /home/users/yebin02/php-debug/php-src-PHP-7.0.33-install/ext/extension/xchain.so: undefined symbol: __gxx_personality_v0 in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library '/home/users/yebin02/php-debug/php-src-PHP-7.0.33-install/ext/extension/xchain.so' - /home/users/yebin02/php-debug/php-src-PHP-7.0.33-install/ext/extension/xchain.so: undefined symbol: __gxx_personality_v0 in Unknown on line 0
+
+解决方案，编写的扩展增加参数 -lstdc++
+ /opt/compiler/gcc-4.8.2/bin/gcc   -lstdc++ -shared  .libs/php_xchain.o lcv_linuxc.a -Wl,-soname  -o .libs/xchain.so
