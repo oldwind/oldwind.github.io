@@ -1,6 +1,6 @@
 ---
 layout: content
-title: 一次php扩展上线引发的故障
+title: php扩展开发遇到的"Warning: Function registration failed - duplicate name"
 status: 2 
 category: go, php
 author:   "yimuren"
@@ -9,5 +9,3 @@ tags:
 ---
 
 ## 一. 前言
-
-
