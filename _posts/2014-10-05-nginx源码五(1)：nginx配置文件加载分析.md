@@ -1,9 +1,10 @@
 ---
 layout: content
-title: nginx源码五(1)：nginx配置加载分析
+title: nginx配置加载分析
 status: 1
 complete: 100% 
 author:     "yimuren"
+recommend: 1
 tags:
     - nginx
 ---

@@ -1,9 +1,10 @@
 ---
 layout: content
-title: nginx源码四：nginx服务启动分析
+title: nginx服务启动分析
 status:  1
 # complete: 70% 
 author:     "yimuren"
+recommend: 1
 tags:
     - nginx
 ---

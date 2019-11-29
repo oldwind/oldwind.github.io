@@ -1,9 +1,10 @@
 ---
 layout: content
-title: nginx源码五(2)：nginx配置文件分析-指令的理解
+title: nginx配置文件分析-指令的理解
 status: 1
 complete: 10% 
 author:     "yimuren"
+recommend: 1
 tags:
     - nginx
 ---

@@ -101,6 +101,25 @@ layout: default
                 </section>
                 {% endif %}
 
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="{{'/tags/' | prepend: site.baseurl }}">RECOMMEND TOP</a></h5>
+
+                    {% for post in site.posts limit:200  %}
+                    {% if post.status == 1 %}
+                        {% if post.recommend == 1 %}
+                        <li style="color: black; font-size: 14px;">
+                            <a href="{{ post.url | prepend: site.baseurl }}">
+                               {{ post.title | truncate:25  }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+
+                    {% endfor %}
+                </section>
+
+
                 <!-- Short About -->
                 <section class="visible-md visible-lg">
                     <hr><h5><a href="{{'/about/' | prepend: site.baseurl }}">ABOUT ME</a></h5>

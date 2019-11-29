@@ -10,11 +10,15 @@ description: "Stay hungry, Stay foolish"
             <h2 class="post-title">
                 {{ post.title }}
             </h2>
+        </a>
+        <a href="{{ post.url | prepend: site.baseurl }}">
             {% if post.subtitle %}
             <h3 class="post-subtitle">
                 {{ post.subtitle }}
             </h3>
             {% endif %}
+        </a>
+        <a href="{{ post.url | prepend: site.baseurl }}"></a>
             <div class="post-content-preview">
                 {{ post.content | strip_html | truncate:200 }}
             </div>

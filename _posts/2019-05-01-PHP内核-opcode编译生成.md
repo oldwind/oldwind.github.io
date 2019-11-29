@@ -4,6 +4,7 @@ title: php内核opcode编译执行
 status: 1 
 category: c and c++
 author:   "yimuren"
+recommend: 1
 tags:
     - php
     - c

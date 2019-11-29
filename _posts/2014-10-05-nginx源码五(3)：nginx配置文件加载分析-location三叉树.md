@@ -1,9 +1,10 @@
 ---
 layout: content
-title: nginx源码五(3)：nginx配置文件分析-location前缀树
+title: nginx配置文件分析-location前缀树
 status: 1
 complete: 10% 
 author:     "yimuren"
+recommend: 1
 tags:
     - nginx
 ---
