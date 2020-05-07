@@ -2,7 +2,7 @@
 layout: content
 title: mysql源码编译
 status: 2
-category: redis, c
+category: mysql, c
 author:   "yimuren"
 tags:
     - c
@@ -25,5 +25,5 @@ cmake \
 -DWITH_DEBUG=1 \
 -DCURSES_LIBRARY=/usr/lib/libncurses.so \
 -DCURSES_INCLUDE_PATH=/usr/include
-s
+
 ```

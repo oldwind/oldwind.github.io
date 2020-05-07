@@ -1156,16 +1156,22 @@ body {
     font-weight: 700
 }
 
-.side-catalog .catalog-body .h3_nav,
-.side-catalog .catalog-body .h4_nav {
+.side-catalog .catalog-body .h3_nav {
     margin-left: 10px;
     font-size: 12px;
-    font-weight: 500
+    font-weight: 450
 }
+
+.side-catalog .catalog-body .h4_nav {
+    margin-left: 20px;
+    font-size: 12px;
+    font-weight: 450
+}
+
 
 .side-catalog .catalog-body .h5_nav,
 .side-catalog .catalog-body .h6_nav {
-    margin-left: 20px;
+    margin-left: 30px;
     font-size: 12px;
     font-weight: 500
 
